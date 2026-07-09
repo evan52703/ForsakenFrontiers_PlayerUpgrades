@@ -1,0 +1,76 @@
+Non-game view GUI only accessible via host which creates a popup window. Allows host to buy upgrades which are universal amongst the lobby and either apply to all relating game objects, players, or items.
+
+Nature of purchases are expensive but rewarding with multiple tiers to their level and a special final tier.
+
+Assign costs in code.
+
+GUI can be accessed from the facility but upgrades are only available while in transit.
+
+Efficient (I-V) *Speed and Stamina Increase
+I: Speed +5%, Stamina +5%					
+II: Speed +5%, Stamina +5%	
+III: Speed +10%, Stamina +10%
+IV: Speed +10%, Stamina +10%
+V: Adrenaline: +20% Speed boost while hurt
+
+Elusive (I-V) *Sound Decrease
+I: Sound -8%
+II: Sound -10%
+III: Sound -12%
+
+Tinkerer(I-X) *Tool Durability Increase (percentages round up)
+I: Tool Durability +10%
+II: Light Range & Intensity +5%
+III: Tool Durability +10%
+IV: Light Range & Intensity +5%
+VI: Tool Durability +20%
+VII: Light Range & Intensity +10%
+VIII: Tool Durability +20%
+IX: Light Range & Intensity +10%
+X: Code Cracker: Infinite Tool Durability & Immunity to EMP
+
+Rummager (I-X) *Loot value and spawn rate
+I: Loot Value +5%
+II: Loot Frequency +5%
+III: Loot Value +5%
+IV: Loot Frequency +5%
+V: Shiny Loot: Loot has 1% chance to give 5x value (stacks with value)
+VI: Shiny Loot +1%
+VII: Shiny Loot +1%
+VIII: Shiny Loot +1%
+IX: Shiny Loot +1%
+X: Loot Value +5%, Loot Frequency +5%, Shiny Loot +2%
+
+Precursor (I-IV) *Facility Time (6AM start)
+I: Facility Arrival Time -1 hour (5AM start)
+II: Facility Arrival Time -1 hour (4AM start)
+III: Facility Arrival Time -2 hours (2AM start)
+IV: Head Start: Monster spawn delay (1.5 hours)
+
+
+
+
+functions: 
+int getGlobalFund() - returns int of current money
+bool canAfford(cost, currentFunds) - returns true or false of whether upgrade can be afforded
+void applyUpgradeEfficient()
+void applyUpgradeElusive()
+void applyUpgradeTinkerer()
+void applyUpgradeRummager()
+
+
+Networking Strategy:
+All clients and host pull current upgrades from train name and set
+local vars to it
+All clients and host have up to date upgrades on their GUI
+All clients and host can purchase upgrades on their GUI
+If they do:
+- update own upgrade var number and set train name to updated var number
+- all clients and host read new train name and set vars
+- only hosts mod will apply changes to all players via IsOwner on read
+
+Ensures:
+- All players can interact with the mod menu
+- All players see live updates to their current upgrades
+- Only hosts instance applies changes to not stack changes
+
