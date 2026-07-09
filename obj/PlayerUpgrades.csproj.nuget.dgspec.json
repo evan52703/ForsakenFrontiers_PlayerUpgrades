@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\PlayerUpgrades_Modified\\PlayerUpgrades.csproj": {}
+    "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\PlayerUpgrades.csproj": {}
   },
   "projects": {
-    "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\PlayerUpgrades_Modified\\PlayerUpgrades.csproj": {
+    "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\PlayerUpgrades.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\PlayerUpgrades_Modified\\PlayerUpgrades.csproj",
+        "projectUniqueName": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\PlayerUpgrades.csproj",
         "projectName": "PlayerUpgrades",
-        "projectPath": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\PlayerUpgrades_Modified\\PlayerUpgrades.csproj",
+        "projectPath": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\PlayerUpgrades.csproj",
         "packagesPath": "C:\\Users\\evant\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\PlayerUpgrades_Modified\\obj\\",
+        "outputPath": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
