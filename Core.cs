@@ -13,6 +13,8 @@ using ImageConversion = UnityEngine.ImageConversion;
 [assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.3.0", "evan527", null)]
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
+// TEST COMMIT
+
 namespace PlayerUpgrades
 {
     public class Core : MelonMod
