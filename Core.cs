@@ -14,6 +14,7 @@ using ImageConversion = UnityEngine.ImageConversion;
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
 // TEST COMMIT
+// TEST COMMIT 2
 
 namespace PlayerUpgrades
 {

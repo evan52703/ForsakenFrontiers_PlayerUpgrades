@@ -29,7 +29,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
@@ -45,6 +45,19 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Core.cs",
+              "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
+              "RelativeDocumentMoniker": "Core.cs",
+              "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
+              "RelativeToolTip": "Core.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-02-02T22:09:40.299Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 3,
               "Title": "UpgradeInit.cs",
               "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\UpgradeInit.cs",
@@ -54,19 +67,6 @@
               "ViewState": "AgIAACsAAAAAAAAAAAAgwBMAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-11T04:39:57.213Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Core.cs",
-              "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
-              "RelativeDocumentMoniker": "Core.cs",
-              "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
-              "RelativeToolTip": "Core.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAOAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-02-02T22:09:40.299Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",
