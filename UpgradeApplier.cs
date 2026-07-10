@@ -114,9 +114,19 @@ namespace PlayerUpgrades
             MelonLogger.Msg($"All upgrades applied.\n");
         }
 
-        //################################################################################################
+        [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
+        public static class ForerunnerUpgradeApplier
+        {
+            [HarmonyPostfix]
+            public static void ForerunnerApplier(FFTrain __instance)
+            {
+                //train.time - upgrades[4].upgLvl;
+            }
+        }
 
-        private static void resetAllVars(FFPlayer player)
+            //################################################################################################
+
+            private static void resetAllVars(FFPlayer player)
         {
             player.maxStableMoveSpeed = player.StartingMaxStableMoveSpeed;
             player.staminaDrainRate = player.startingStaminaDrainRate;
@@ -142,6 +152,4 @@ namespace PlayerUpgrades
             //TODO
         }
     }
-
-
 }

@@ -13,9 +13,6 @@ using ImageConversion = UnityEngine.ImageConversion;
 [assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.3.0", "evan527", null)]
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
-// TEST COMMIT
-// TEST COMMIT 2
-// TEST COMMIT 3
 
 namespace PlayerUpgrades
 {
@@ -92,7 +89,7 @@ namespace PlayerUpgrades
                 world = null;
                 inGame = false;
                 upgradeSelected = null;
-                _menuEnabled = false; //closes menu when in
+                _menuEnabled = false;
                 waitingForSceneObjects = false;
             }
         }
@@ -146,6 +143,8 @@ namespace PlayerUpgrades
 
             if (train.IsStoppedAtPOI)
             {
+                _menuEnabled = false; //closes menu when not at POI
+                upgradeSelected = null; //resets selection when not at POI
                 GUI.Box(new Rect(x_adj, y_adj, 180, 50), "<b>Player Upgrades</b>\nUnavailable");
             }
             else if (!_menuEnabled)
