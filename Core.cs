@@ -30,6 +30,9 @@ namespace PlayerUpgrades
         public static List<Upgrade> upgrades;
         public static List<int> GlobalUpgradeLevels = new List<int> { 0, 0, 0, 0, 0 };
 
+            //forerunner
+            public static bool forerunnerUpgradeSet = false;
+
         //upgrade class
         public class Upgrade
         {
@@ -113,13 +116,18 @@ namespace PlayerUpgrades
                 }
                 return;
             }
+            //forerunner var reset
+            if (!train.IsStoppedAtPOI && forerunnerUpgradeSet)
+            {
+                forerunnerUpgradeSet = false;
+            }
 
             //enable/disable menu
             if (Input.GetKeyDown(menuKey) && inGame)
             {
                 _menuEnabled = !_menuEnabled;
             }
-
+            //testing key
             if (Input.GetKeyDown(testingKey) && inGame)
             {
                 if (SteamIDUses.IsHostList(localSteamID))

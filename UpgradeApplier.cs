@@ -114,13 +114,18 @@ namespace PlayerUpgrades
             MelonLogger.Msg($"All upgrades applied.\n");
         }
 
+        //[HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OnWorldCompletedGenerating))] (crashes game)
         [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
         public static class ForerunnerUpgradeApplier
         {
             [HarmonyPostfix]
             public static void ForerunnerApplier(FFTrain __instance)
             {
-                //train.time - upgrades[4].upgLvl;
+                if (SteamIDUses.IsHost(localSteamID) && !forerunnerUpgradeSet) {
+                    world.Hour -= upgrades[4].upgLvl;
+                    forerunnerUpgradeSet = true;
+                    MelonLogger.Msg($"Doors Opened. Applying Forerunner buff\n");
+                }
             }
         }
 

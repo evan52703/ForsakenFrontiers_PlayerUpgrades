@@ -30,23 +30,14 @@ namespace PlayerUpgrades
         {
             FFPlayer[] players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
 
-            MelonLogger.Msg($"Player's Local Steam ID: {localSteamID}\n");
             foreach (var p in players)
             {
-                MelonLogger.Msg($"Comparing to Steam ID: {localSteamID}...");
-                if (p.SteamID.m_SteamID == localSteamID)
+                if (p.SteamID.m_SteamID == localSteamID && p.IsHost)
                 {
-                    MelonLogger.Msg($" TRUE. ");
-                }
-                MelonLogger.Msg($"Checking if host: ...");
-                if (p.IsHost)
-                {
-                    MelonLogger.Msg($" TRUE. Host found. Test Concluding.\n");
                     return true;
                 }
-                MelonLogger.Msg($" FALSE. Next player...\n");
             }
-            //should fail for everybody but host
+            // fail for everybody but host
             return false;
         }
 
