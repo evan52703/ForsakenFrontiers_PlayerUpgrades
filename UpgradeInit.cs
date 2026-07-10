@@ -18,7 +18,7 @@ namespace PlayerUpgrades
             if (upgrades == null) upgrades = new List<Upgrade>();
             else upgrades.Clear();
 
-            AddUpgrade(upgrades, "Efficient", "Master maneuverability.", loadTextures("efficient"),
+            AddUpgrade(upgrades, "Evader", "Master maneuverability.", loadTextures("evader"),
                 //upgrade start, upgrade max
                 0, 20, new Color(0.737f, 0.718f, 0.353f, 1f),
                 //cost init, cost scaler
@@ -27,7 +27,7 @@ namespace PlayerUpgrades
                 5f)
                 ;
 
-            AddUpgrade(upgrades, "Elusive", "Become undetectable.", loadTextures("elusive"),
+            AddUpgrade(upgrades, "Lurker", "Become undetectable.", loadTextures("lurker"),
                 0, 3, new Color(0.765f, 0.894f, 0.839f, 1f),
                 //cost init, cost scaler
                 99999, 500,
@@ -51,7 +51,7 @@ namespace PlayerUpgrades
                 0.01f)
                 ;
 
-            AddUpgrade(upgrades, "Precursor", "Time is of the essence.", loadTextures("precursor"),
+            AddUpgrade(upgrades, "Forerunner", "Ahead of the game.", loadTextures("forerunner"),
                 0, 5, new Color(0.25f, 0.25f, 0.455f, 1f),
                 //cost init, cost scaler
                 3000, 1500,

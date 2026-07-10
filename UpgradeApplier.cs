@@ -105,8 +105,8 @@ namespace PlayerUpgrades
             resetAllVars(myPlayer);
 
             //apply upgrades
-            applyUpgradeEfficient(upgrades[0].upgLvl, upgrades[0].upgScaler, myPlayer);
-            applyUpgradeElusive(upgrades[1].upgLvl, upgrades[1].upgScaler, myPlayer);
+            applyUpgradeEvader(upgrades[0].upgLvl, upgrades[0].upgScaler, myPlayer);
+            applyUpgradeLurker(upgrades[1].upgLvl, upgrades[1].upgScaler, myPlayer);
             applyUpgradeTinkerer(upgrades[2].upgLvl, upgrades[2].upgScaler, myPlayer);
             applyUpgradeRummager(upgrades[3].upgLvl, upgrades[3].upgScaler, myPlayer);
 
@@ -136,7 +136,7 @@ namespace PlayerUpgrades
             player.maxStableMoveSpeed = player.StartingMaxStableMoveSpeed;
             player.staminaDrainRate = player.startingStaminaDrainRate;
         }
-        private static void applyUpgradeEfficient(int lvl, float scaler, FFPlayer player)
+        private static void applyUpgradeEvader(int lvl, float scaler, FFPlayer player)
         {
             //apply changes
             float statUp = 1+(lvl*(scaler/100));
@@ -144,7 +144,7 @@ namespace PlayerUpgrades
             player.staminaDrainRate /= statUp;
 
         }
-        private static void applyUpgradeElusive(int lvl, float scaler, FFPlayer player)
+        private static void applyUpgradeLurker(int lvl, float scaler, FFPlayer player)
         {
           //TODO
         }
