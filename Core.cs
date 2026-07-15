@@ -3,14 +3,16 @@ using Il2Cppmadeinfairyland.fairyengine.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.datadeck;
+using Il2Cppmadeinfairyland.forsakenfrontiers.hazards;
 using Il2Cppmadeinfairyland.forsakenfrontiers.train;
 using Il2CppSystem.Runtime.Remoting.Messaging;
 using MelonLoader;
 using MelonLoader.Utils;
 using UnityEngine;
 using ImageConversion = UnityEngine.ImageConversion;
+using Il2CppFishNet.Broadcast;
 
-[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.3.0", "evan527", null)]
+[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.3.3", "evan527", null)]
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
 
@@ -70,12 +72,14 @@ namespace PlayerUpgrades
         }
 
         //other vars
+        public static bool debug = false;
         public static FFTrain train;
         public static FFWorld world;
         private bool waitingForSceneObjects = false;
 
         //################################################################################################################
         //Methods
+        
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
@@ -139,6 +143,18 @@ namespace PlayerUpgrades
                     MelonLogger.Msg("You no host.");
                 }
             }
+
+            //explode bomb
+            if (Input.GetMouseButtonDown(1))
+            {
+                var allMines = UnityEngine.Object.FindObjectsOfType<FFLandmine>();
+                foreach (FFLandmine mine in allMines)
+                {
+                    mine.svr_Explode();
+                    MelonLogger.Msg($"Bomb exploded.");
+                }
+            }
+
         }
 
         public override void OnGUI()

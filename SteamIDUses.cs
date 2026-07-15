@@ -60,17 +60,17 @@ namespace PlayerUpgrades
                 counter++;
 
                 MelonLogger.Msg($"Test {counter}/{players.Length}");
-                MelonLogger.Msg($"Comparing to Steam ID: {localSteamID}...");
+                MelonLogger.Msg($"Comparing to Steam ID: {localSteamID}..."); //not correct. using ours
                 if (p.SteamID.m_SteamID == localSteamID)
                 {
                     MelonLogger.Msg($" TRUE. ");
-                }
-                MelonLogger.Msg($"Checking if host: ...");
-                if (p.IsHost)
-                {
-                    MelonLogger.Msg($" TRUE. Host found.\n");
-                    hostFound = true;
-                    continue;
+                    MelonLogger.Msg($"Checking if host: ...");
+                    if (p.IsHost)
+                    {
+                        MelonLogger.Msg($" TRUE. Host found.\n");
+                        hostFound = true;
+                        continue;
+                    }
                 }
                 MelonLogger.Msg($" FALSE.\n");
             }

@@ -22,7 +22,8 @@ namespace PlayerUpgrades
                 //upgrade start, upgrade max
                 0, 20, new Color(0.737f, 0.718f, 0.353f, 1f),
                 //cost init, cost scaler
-                1000, 500,
+                //1000, 500, //default
+                10, 50, //test
                 //upgrade scaler
                 5f)
                 ;
@@ -54,8 +55,9 @@ namespace PlayerUpgrades
             AddUpgrade(upgrades, "Forerunner", "Ahead of the game.", loadTextures("forerunner"),
                 0, 5, new Color(0.25f, 0.25f, 0.455f, 1f),
                 //cost init, cost scaler
-                3000, 1500,
-                //upgrade scaler
+                //3000, 1500, //default
+                10, 50, //test
+                        //upgrade scaler
                 1f)
                 ;
 
