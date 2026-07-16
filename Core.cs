@@ -12,7 +12,7 @@ using UnityEngine;
 using ImageConversion = UnityEngine.ImageConversion;
 using Il2CppFishNet.Broadcast;
 
-[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.3.3", "evan527", null)]
+[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.4.0", "evan527", null)]
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
 

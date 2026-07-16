@@ -15,6 +15,7 @@ using MelonLoader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -33,79 +34,61 @@ namespace PlayerUpgrades
 
         public static void ServerApplyUpgrade(int index)
         {
-            // set global index identifier
-            indexOfUpgrade = index;
 
-            MelonLogger.Msg($"Upgrade stuff adjusted. Triggering train.OpenDoors.");
+            MelonLogger.Msg($"Triggering train.OpenDoors & requesting credits * 1000.");
             // open doors for all players on server
+            //ENCODER
+            if (train.Credits == 0) train.Credits++; //0 check
+
+            int encoded = (train.Credits * 999) + index;
+
+            MelonLogger.Msg($"ENCODE:");
+            MelonLogger.Msg($"Credits: {train.Credits}");
+            MelonLogger.Msg($"Index: {index}");
+            MelonLogger.Msg($"Encoded: {encoded}");
+
+            train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded);
             train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
         }
+        //if true credits were 234 -> 235 -> 235000 -> 235001
+        //train.Credits = 235001 now
+        //index = train.Credits % 1000; -> 1
+        //train.Credits -= index;
+        //train.Credits /= 1000;
 
 
         [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
-        public static class ForerunnerUpgradeApplier
+        public static class DoorsPrefix
         {
-            [HarmonyPostfix]
-            public static void ForerunnerApplier(FFTrain __instance)
+            [HarmonyPrefix]
+            public static void DoorsPrefixServer(FFTrain __instance)
             {
                 MelonLogger.Msg($"Entered 'OpenDoors' Postfix.\n");
+                MelonLogger.Msg($"[SERVER:BEFORE] __instance.Credits: {__instance.Credits}");
+                MelonLogger.Msg($"[SERVER:BEFORE] train.Credits: {train.Credits}\n");
 
+                int index = -1;
 
-                //// upgrade requested user gets their local machine
-                //if (requestSteamID == localSteamID)
-                //{
-                //    train.indexHolder = indexOfUpgrade;
-                //}
+                //DECODER
+                if (__instance.Credits >= 1000)
+                {
+                    //DECODER
+                    index = __instance.Credits % 1000;
+                    __instance.Credits -= index;
+                    __instance.Credits /= 1000;
+                    if(__instance.Credits == 1) __instance.Credits -= 1; //0 check
 
-                //requestSteamID = 0;
+                    train.Credits = __instance.Credits;
+                }
+                MelonLogger.Msg($"[SERVER:AFTER] Processing upgrade index: {index}");
+                MelonLogger.Msg($"[SERVER:AFTER] __instance.Credits: {__instance.Credits}");
+                MelonLogger.Msg($"[SERVER:AFTER] train.Credits: {train.Credits}");
 
-
-                //if (train.indexHolder < 0 || train.indexHolder >= upgrades.Count)
-                //    return;
-
-
-                //// get and level up upgrade
-                //var upgrade = upgrades[train.indexHolder];
-
-                //if (upgrade.upgLvl >= upgrade.upgLvlMax)
-                //    return;
-
-
-                //// adjust costs
-                //int cost = upgrade.initCost + upgrade.costScaler * upgrade.upgLvl;
-
-                //if (train.Credits < cost)
-                //    return;
-
-
-                //costOfUpgrade = cost;
-
-
-                //// update local train level
-                //upgrade.upgLvl++;
-
-
-                //MelonLogger.Msg($"Train Name before: {train.gameObject.name}");
-                //MelonLogger.Msg($"Credits before: {train.Credits}");
-
-
-                //// Change server name of train
-                //train.gameObject.name =
-                //    "UPG:" +
-                //    string.Join(",", upgrades.Select(u => u.upgLvl));
-
-
-                //// Adjust server credits
-                //train.Credits -= costOfUpgrade;
-
-
-                // apply upgrades locally
+                //every instance launches upgrade
                 ApplyUpgradesServer();
-
 
                 //FORERUNNER
                 MelonLogger.Msg($"Doors Opened. Attempting Forerunner buff");
-
 
                 if (SteamIDUses.IsHost(localSteamID) &&
                     !forerunnerUpgradeSet &&
@@ -116,14 +99,16 @@ namespace PlayerUpgrades
                     world.Hour -= upgrades[4].upgLvl;
                     forerunnerUpgradeSet = true;
                 }
+                else
+                {
+                    MelonLogger.Msg($"Not Stopped at POI. No Forerunner attempt.");
+                }
             }
         }
 
 
         private static void ApplyUpgradesServer()
         {
-            MelonLogger.Msg($"Train Name after: {train.gameObject.name}");
-            MelonLogger.Msg($"Credits after: {train.Credits}\n");
 
 
             // get my player
@@ -217,3 +202,54 @@ namespace PlayerUpgrades
         }
     }
 }
+
+
+//// upgrade requested user gets their local machine
+//if (requestSteamID == localSteamID)
+//{
+//    train.indexHolder = indexOfUpgrade;
+//}
+
+//requestSteamID = 0;
+
+
+//if (train.indexHolder < 0 || train.indexHolder >= upgrades.Count)
+//    return;
+
+
+//// get and level up upgrade
+//var upgrade = upgrades[train.indexHolder];
+
+//if (upgrade.upgLvl >= upgrade.upgLvlMax)
+//    return;
+
+
+//// adjust costs
+//int cost = upgrade.initCost + upgrade.costScaler * upgrade.upgLvl;
+
+//if (train.Credits < cost)
+//    return;
+
+
+//costOfUpgrade = cost;
+
+
+//// update local train level
+//upgrade.upgLvl++;
+
+
+//MelonLogger.Msg($"Train Name before: {train.gameObject.name}");
+//MelonLogger.Msg($"Credits before: {train.Credits}");
+
+
+//// Change server name of train
+//train.gameObject.name =
+//    "UPG:" +
+//    string.Join(",", upgrades.Select(u => u.upgLvl));
+
+
+//// Adjust server credits
+//train.Credits -= costOfUpgrade;
+
+
+// apply upgrades locally
