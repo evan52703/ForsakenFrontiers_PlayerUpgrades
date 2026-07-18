@@ -3,23 +3,23 @@
   "WorkspaceRootPath": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\core.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:core.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\upgradeinit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:upgradeinit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\steamiduses.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:steamiduses.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\saves\\upgrademenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\core.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:core.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\upgradeapplier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:upgradeapplier.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\saves\\upgrademenu.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\upgradeinit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:upgradeinit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|c:\\users\\evant\\onedrive\\desktop\\mods\\forsaken\\forsakenfrontiers_playerupgrades\\steamiduses.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E7E20ADD-82DD-4901-A128-B6B0C4ED7C8E}|PlayerUpgrades.csproj|solutionrelative:steamiduses.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -29,69 +29,70 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
+              "Title": "SteamIDUses.cs",
+              "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\SteamIDUses.cs",
+              "RelativeDocumentMoniker": "SteamIDUses.cs",
+              "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\SteamIDUses.cs",
+              "RelativeToolTip": "SteamIDUses.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-06T04:31:02.765Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "UpgradeApplier.cs",
               "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\UpgradeApplier.cs",
               "RelativeDocumentMoniker": "UpgradeApplier.cs",
               "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\UpgradeApplier.cs",
               "RelativeToolTip": "UpgradeApplier.cs",
-              "ViewState": "AgIAAFkAAAAAAAAAAAAUwG8AAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAB0AAAAAAAAAAAAQwCsAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-12T04:12:39.878Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "SteamIDUses.cs",
-              "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\SteamIDUses.cs",
-              "RelativeDocumentMoniker": "SteamIDUses.cs",
-              "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\SteamIDUses.cs",
-              "RelativeToolTip": "SteamIDUses.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAgwBsAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-07-06T04:31:02.765Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "Core.cs",
               "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
               "RelativeDocumentMoniker": "Core.cs",
               "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\Core.cs",
               "RelativeToolTip": "Core.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAABKAAAAAAAAAA==",
+              "ViewState": "AgIAAHoAAAAAAAAAAAAiwJUAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-02T22:09:40.299Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "UpgradeMenu.cs",
               "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\SAVES\\UpgradeMenu.cs",
               "RelativeDocumentMoniker": "..\\SAVES\\UpgradeMenu.cs",
               "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\SAVES\\UpgradeMenu.cs",
               "RelativeToolTip": "..\\SAVES\\UpgradeMenu.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAUwDUAAAANAAAAAAAAAA==",
+              "ViewState": "AgIAAHgAAAAAAAAAAAAQwF8AAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-28T15:17:25.682Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "UpgradeInit.cs",
               "DocumentMoniker": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\UpgradeInit.cs",
               "RelativeDocumentMoniker": "UpgradeInit.cs",
               "ToolTip": "C:\\Users\\evant\\OneDrive\\Desktop\\Mods\\Forsaken\\ForsakenFrontiers_PlayerUpgrades\\UpgradeInit.cs",
               "RelativeToolTip": "UpgradeInit.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAgwDkAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAABYAAAAAAAAAAAAgwBkAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-11T04:39:57.213Z",
               "EditorCaption": ""

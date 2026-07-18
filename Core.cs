@@ -76,10 +76,11 @@ namespace PlayerUpgrades
         public static FFTrain train;
         public static FFWorld world;
         private bool waitingForSceneObjects = false;
+        public static bool arrivingToPOI = false;
 
         //################################################################################################################
         //Methods
-        
+
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
@@ -120,11 +121,15 @@ namespace PlayerUpgrades
                 }
                 return;
             }
+
+            if (!inGame || train == null) return;
+
             //forerunner var reset
             if (!train.IsStoppedAtPOI && forerunnerUpgradeSet)
             {
                 forerunnerUpgradeSet = false;
             }
+
 
             //enable/disable menu
             if (Input.GetKeyDown(menuKey) && inGame)
@@ -141,17 +146,6 @@ namespace PlayerUpgrades
                 else
                 {
                     MelonLogger.Msg("You no host.");
-                }
-            }
-
-            //explode bomb
-            if (Input.GetMouseButtonDown(1))
-            {
-                var allMines = UnityEngine.Object.FindObjectsOfType<FFLandmine>();
-                foreach (FFLandmine mine in allMines)
-                {
-                    mine.svr_Explode();
-                    MelonLogger.Msg($"Bomb exploded.");
                 }
             }
 

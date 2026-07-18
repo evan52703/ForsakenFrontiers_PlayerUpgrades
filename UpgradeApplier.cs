@@ -3,6 +3,7 @@ using Il2CppFishNet;
 using Il2CppFishNet.Example.ColliderRollbacks;
 using Il2CppFishNet.Object;
 using Il2Cppmadeinfairyland.fairyengine.actor.player;
+using Il2Cppmadeinfairyland.forsakenfrontiers;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.datadeck;
 using Il2Cppmadeinfairyland.forsakenfrontiers.demo;
@@ -31,77 +32,135 @@ namespace PlayerUpgrades
         public static int costOfUpgrade = -1;
         public static int testVar = 100;
 
+        public static bool localDebug = false;
+
 
         public static void ServerApplyUpgrade(int index)
         {
 
-            MelonLogger.Msg($"Triggering train.OpenDoors & requesting credits * 1000.");
-            // open doors for all players on server
+            if(localDebug) MelonLogger.Msg($"Triggering train.OpenDoors & requesting credits * 1000.");
+            // open doors for all players on server 
             //ENCODER
             if (train.Credits == 0) train.Credits++; //0 check
 
             int encoded = (train.Credits * 999) + index;
 
-            MelonLogger.Msg($"ENCODE:");
-            MelonLogger.Msg($"Credits: {train.Credits}");
-            MelonLogger.Msg($"Index: {index}");
-            MelonLogger.Msg($"Encoded: {encoded}");
-
+            if (localDebug)
+            {
+                MelonLogger.Msg($"ENCODE:");
+                MelonLogger.Msg($"Credits: {train.Credits}");
+                MelonLogger.Msg($"Index: {index}");
+                MelonLogger.Msg($"Encoded: {encoded}");
+            }
             train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded);
             train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
         }
-        //if true credits were 234 -> 235 -> 235000 -> 235001
-        //train.Credits = 235001 now
-        //index = train.Credits % 1000; -> 1
-        //train.Credits -= index;
-        //train.Credits /= 1000;
 
-
-        [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
-        public static class DoorsPrefix
+        [HarmonyPatch(typeof(FFTrainBrake), nameof(FFTrainBrake.OnUsed))]
+        public static class BrakePrefix
         {
             [HarmonyPrefix]
-            public static void DoorsPrefixServer(FFTrain __instance)
+            public static void BrakePrefixServer(FFTrainBrake __instance)
             {
-                MelonLogger.Msg($"Entered 'OpenDoors' Postfix.\n");
-                MelonLogger.Msg($"[SERVER:BEFORE] __instance.Credits: {__instance.Credits}");
-                MelonLogger.Msg($"[SERVER:BEFORE] train.Credits: {train.Credits}\n");
-
-                int index = -1;
-
-                //DECODER
-                if (__instance.Credits >= 1000)
+                arrivingToPOI = !arrivingToPOI;
+                if (localDebug)
                 {
+                    MelonLogger.Msg($"\n\nEntered 'FFTrainBrake.OnUsed' Prefix.");
+                    if (arrivingToPOI) MelonLogger.Msg($"Traveling to POI; Disabling Door Decoder\n\n");
+                    else MelonLogger.Msg($"Returning from POI; Enabling Door Decoder\n\n");
+                }
+            }
+        }
+
+        [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
+        public static class DoorsPostfix
+        {
+            [HarmonyPostfix]
+            public static void DoorsPostfixServer(FFTrain __instance)
+            {
+                if (localDebug) MelonLogger.Msg($"Entered 'FFTrain.OpenDoors' Postfix.");
+
+                //not at POI check for not triggering during at POI gameplay
+                if (!arrivingToPOI && !train.IsStoppedAtPOI)
+                {
+                    if (localDebug)
+                    {
+                        MelonLogger.Msg($"[NOT AT POI] Doors Opened. Attempting UpgradeRequest Read/Decode/Apply\n");
+                        MelonLogger.Msg($"[SERVER:BEFORE] __instance.Credits: {__instance.Credits}");
+                        MelonLogger.Msg($"[SERVER:BEFORE] train.Credits: {train.Credits}\n");
+                    }
+                    int index = -1;
+
                     //DECODER
-                    index = __instance.Credits % 1000;
-                    __instance.Credits -= index;
-                    __instance.Credits /= 1000;
-                    if(__instance.Credits == 1) __instance.Credits -= 1; //0 check
+                    if (__instance.Credits >= 1000)
+                    {
+                        //DECODER
+                        index = __instance.Credits % 1000;
+                        __instance.Credits -= index;
+                        __instance.Credits /= 1000;
+                        if (__instance.Credits == 1) __instance.Credits -= 1; //0 check
 
-                    train.Credits = __instance.Credits;
+                        train.Credits = __instance.Credits;
+                    }
+
+                    if (localDebug)
+                    {
+                        MelonLogger.Msg($"[SERVER:AFTER] Processing upgrade index: {index}");
+                        MelonLogger.Msg($"[SERVER:AFTER] __instance.Credits: {__instance.Credits}");
+                        MelonLogger.Msg($"[SERVER:AFTER] train.Credits: {train.Credits}\n");
+                    }
+                    //no request
+                    if (index == -1) return;
+
+                    //
+                    //Each client updates their local upgrades
+                    //
+                    // get and level up upgrade
+                    var upgrade = upgrades[index];
+
+                    // adjust costs
+                    int cost = upgrade.initCost + (upgrade.costScaler * upgrade.upgLvl);
+
+                    // update local level and credits
+                    upgrade.upgLvl++;
+
+                    // Adjust server credits        || Optionally update datadeck in future update. Too tall an order currently
+                    __instance.Credits -= cost;
+
+                    // Change server name of train
+                    train.gameObject.name =
+                        "UPG:" +
+                        string.Join(",", upgrades.Select(u => u.upgLvl));
+
+                    if (localDebug)
+                    {
+                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] cost: {cost}");
+                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] __instance.Credits: {__instance.Credits}");
+                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] train.Credits: {train.Credits}\n");
+                    }
+
+                    //every instance launches upgrade
+                    ApplyUpgradesServer();
                 }
-                MelonLogger.Msg($"[SERVER:AFTER] Processing upgrade index: {index}");
-                MelonLogger.Msg($"[SERVER:AFTER] __instance.Credits: {__instance.Credits}");
-                MelonLogger.Msg($"[SERVER:AFTER] train.Credits: {train.Credits}");
-
-                //every instance launches upgrade
-                ApplyUpgradesServer();
-
                 //FORERUNNER
-                MelonLogger.Msg($"Doors Opened. Attempting Forerunner buff");
-
-                if (SteamIDUses.IsHost(localSteamID) &&
-                    !forerunnerUpgradeSet &&
-                    train.IsStoppedAtPOI)
-                {
-                    MelonLogger.Msg($"Stopped at POI. I am Host. I set buffs");
-
-                    world.Hour -= upgrades[4].upgLvl;
-                    forerunnerUpgradeSet = true;
-                }
                 else
                 {
-                    MelonLogger.Msg($"Not Stopped at POI. No Forerunner attempt.");
+                    if (localDebug) MelonLogger.Msg($"[AT POI] Doors Opened. Attempting Forerunner buff.\n");
+
+                    if (SteamIDUses.IsHost(localSteamID) && !forerunnerUpgradeSet)
+                    {
+                        //adjust world time based on Forerunner lvl
+                        world.Hour -= upgrades[4].upgLvl;
+
+                        //tick applied var
+                        forerunnerUpgradeSet = true;
+                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.\n");
+                    }
+                    else
+                    {
+                        if (localDebug) MelonLogger.Msg($"Not Host/Already applied Forerunner Buff.\n");
+                    }
                 }
             }
         }
@@ -160,7 +219,7 @@ namespace PlayerUpgrades
             );
 
 
-            MelonLogger.Msg($"All upgrades applied.");
+            if (localDebug) MelonLogger.Msg($"All upgrades applied.");
         }
 
 

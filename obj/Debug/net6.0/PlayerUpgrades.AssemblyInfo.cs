@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PlayerUpgrades")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b920d0df32f04c1a1463c89162faf2f45ba8ce8c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+84506d9fe877691297950b53af6a28cdbf9c7562")]
 [assembly: System.Reflection.AssemblyProductAttribute("PlayerUpgrades")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PlayerUpgrades")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

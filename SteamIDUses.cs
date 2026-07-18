@@ -1,5 +1,6 @@
 ﻿using Il2Cppmadeinfairyland.fairyengine.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.datadeck;
 using MelonLoader;
 using System;
 using System.Collections.Generic;
@@ -20,12 +21,28 @@ namespace PlayerUpgrades
             {
                 if (p.SteamID.m_SteamID == localSteamID)
                 {
+                    //MelonLogger.Msg($"[STEAM:ID // OUT] {p.SteamID.m_SteamID}");
                     return p;
                 }
             }
             MelonLogger.Warning($"ERROR: No matching Steam ID found across all players.");
             return null;
         }
+        //public static FFDataDeck findMyDataDeck(ulong localSteamID)
+        //{
+        //    FFPlayer[] players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
+
+        //    foreach (var p in players)
+        //    {
+        //        if (p.SteamID.m_SteamID == localSteamID)
+        //        {
+        //            MelonLogger.Msg($"[STEAM:ID // OUT] {p.SteamID.m_SteamID}");
+        //            return p.DataDeck;
+        //        }
+        //    }
+        //    MelonLogger.Warning($"ERROR: No matching Steam ID found across all players.");
+        //    return null;
+        //}
         public static bool IsHost(ulong localSteamID)
         {
             FFPlayer[] players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
