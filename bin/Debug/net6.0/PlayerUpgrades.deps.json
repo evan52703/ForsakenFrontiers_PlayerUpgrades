@@ -65,7 +65,7 @@
           "Il2Cpp__Generated": "0.0.0.0",
           "MelonLoader": "0.8.0.2548",
           "Unity.AI.Navigation": "0.0.0.0",
-          "Unity.InputSystem": "1.18.0.0",
+          "Unity.InputSystem": "1.14.2.0",
           "Unity.InputSystem.ForUI": "0.0.0.0",
           "Unity.Mathematics": "0.0.0.0",
           "Unity.Postprocessing.Runtime": "0.0.0.0",
@@ -122,6 +122,7 @@
           "UnityEngine.UnityAnalyticsModule": "0.0.0.0",
           "UnityEngine.UnityConnectModule": "0.0.0.0",
           "UnityEngine.UnityCurlModule": "0.0.0.0",
+          "UnityEngine.UnityTestProtocolModule": "0.0.0.0",
           "UnityEngine.UnityWebRequestAssetBundleModule": "0.0.0.0",
           "UnityEngine.UnityWebRequestAudioModule": "0.0.0.0",
           "UnityEngine.UnityWebRequestModule": "0.0.0.0",
@@ -594,10 +595,10 @@
           }
         }
       },
-      "Unity.InputSystem/1.18.0.0": {
+      "Unity.InputSystem/1.14.2.0": {
         "runtime": {
           "Unity.InputSystem.dll": {
-            "assemblyVersion": "1.18.0.0",
+            "assemblyVersion": "1.14.2.0",
             "fileVersion": "0.0.0.0"
           }
         }
@@ -1050,6 +1051,14 @@
           }
         }
       },
+      "UnityEngine.UnityTestProtocolModule/0.0.0.0": {
+        "runtime": {
+          "UnityEngine.UnityTestProtocolModule.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "UnityEngine.UnityWebRequestAssetBundleModule/0.0.0.0": {
         "runtime": {
           "UnityEngine.UnityWebRequestAssetBundleModule.dll": {
@@ -1133,6 +1142,14 @@
       "UnityEngine.XRModule/0.0.0.0": {
         "runtime": {
           "UnityEngine.XRModule.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Il2CppFORSAKENWATERS/0.0.0.0": {
+        "runtime": {
+          "Il2CppFORSAKENWATERS.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -1615,7 +1632,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Unity.InputSystem/1.18.0.0": {
+    "Unity.InputSystem/1.14.2.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1900,6 +1917,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "UnityEngine.UnityTestProtocolModule/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "UnityEngine.UnityWebRequestAssetBundleModule/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -1951,6 +1973,11 @@
       "sha512": ""
     },
     "UnityEngine.XRModule/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Il2CppFORSAKENWATERS/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

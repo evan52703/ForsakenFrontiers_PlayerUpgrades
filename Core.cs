@@ -12,7 +12,7 @@ using UnityEngine;
 using ImageConversion = UnityEngine.ImageConversion;
 using Il2CppFishNet.Broadcast;
 
-[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.4.0", "evan527", null)]
+[assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.5.0", "evan527", null)]
 [assembly: MelonGame("made in fairyland", "Forsaken Frontiers")]
 
 
@@ -32,8 +32,8 @@ namespace PlayerUpgrades
         public static List<Upgrade> upgrades;
         public static List<int> GlobalUpgradeLevels = new List<int> { 0, 0, 0, 0, 0 };
 
-            //forerunner
-            public static bool forerunnerUpgradeSet = false;
+            //worldgen
+            public static bool worldGenUpgradesSet = false;
 
         //upgrade class
         public class Upgrade
@@ -77,16 +77,26 @@ namespace PlayerUpgrades
         public static FFWorld world;
         private bool waitingForSceneObjects = false;
         public static bool arrivingToPOI = false;
+        public static bool amIHost = false;
 
         //################################################################################################################
         //Methods
 
-
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
+            if (sceneName == "Main Menu")
+            {
+                //get non-clone objects
+                //also sets boltcutter var to test
+                UpgradeInit.GetMainMenuItems();
+                MelonLogger.Msg("Items set.");
+                //UpgradeInit.GetMainMenuLootItems();
+                //MelonLogger.Msg("Loot Items set.");
+            }
             if (sceneName == "Forsaken Frontiers")
             {
                 //once scene loaded, allow OnUpdate()
+                amIHost = SteamIDUses.IsHost(localSteamID);
                 waitingForSceneObjects = true;
                 inGame = false;
             }
@@ -113,21 +123,41 @@ namespace PlayerUpgrades
 
                 if (world != null && train != null)
                 {
-                    train.name = "UPG:0,0,0,0,0";
-                    upgrades = UpgradeInit.initUpgrades(upgrades);
+                    MelonLogger.Msg($"TRAIN_NAME: {train.name}");
+                    // Only format train name if it hasn't been set yet
+                    if (!train.name.StartsWith("UPG:"))
+                    {
+                        train.name = "UPG:0,0,0,0,0";
+                        upgrades = UpgradeInit.initUpgrades(upgrades);
+                    }
+                    //if train name exists, apply upgrades locally
+                    else
+                    {
+                        UpgradeApplier.ApplyUpgradesServer();
+                    }
 
                     waitingForSceneObjects = false; //set to false to avoid infinite loop
                     inGame = true; // run mod features
                 }
                 return;
             }
+            if (! waitingForSceneObjects )
+
+            if (Input.GetKeyDown(testingKey))
+            {
+                //get non-clone objects
+                //also sets boltcutter var to test
+                UpgradeInit.GetMainMenuItems();
+                //UpgradeInit.GetMainMenuLootItems();
+                MelonLogger.Msg("Objects set.");
+            }
 
             if (!inGame || train == null) return;
 
             //forerunner var reset
-            if (!train.IsStoppedAtPOI && forerunnerUpgradeSet)
+            if (!train.IsStoppedAtPOI && worldGenUpgradesSet)
             {
-                forerunnerUpgradeSet = false;
+                worldGenUpgradesSet = false;
             }
 
 
@@ -136,18 +166,18 @@ namespace PlayerUpgrades
             {
                 _menuEnabled = !_menuEnabled;
             }
-            //testing key
-            if (Input.GetKeyDown(testingKey) && inGame)
-            {
-                if (SteamIDUses.IsHostList(localSteamID))
-                {
-                    MelonLogger.Msg("You the host chief.");
-                }
-                else
-                {
-                    MelonLogger.Msg("You no host.");
-                }
-            }
+            ////testing key
+            //if (Input.GetKeyDown(testingKey) && inGame)
+            //{
+            //    if (SteamIDUses.IsHostList(localSteamID))
+            //    {
+            //        MelonLogger.Msg("You the host chief.");
+            //    }
+            //    else
+            //    {
+            //        MelonLogger.Msg("You no host.");
+            //    }
+            //}
 
         }
 

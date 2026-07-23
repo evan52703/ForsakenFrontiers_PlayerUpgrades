@@ -1,6 +1,10 @@
-﻿using MelonLoader;
+﻿using Il2Cppmadeinfairyland.forsakenfrontiers;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.equipment;
+using Il2CppSteamworks;
+using MelonLoader;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,52 +16,132 @@ namespace PlayerUpgrades
 {
     internal static class UpgradeInit
     {
+
+        //get all clonable item objects
+        public static void GetMainMenuItems()
+        {
+            UpgradeApplier.mainMarker = FindObjectByName<FFSprayTool>("SprayMark");
+            UpgradeApplier.mainBoltcutter = FindObjectByName<FFBoltcutters>("Buoltcutters");
+            UpgradeApplier.mainSledgehammer = FindObjectByName<FFSledgehammer>("SledgeHammer");
+            UpgradeApplier.mainStunlight = FindObjectByName<FFStunLight>("StunLight");
+
+            UpgradeApplier.mainGlowstick = FindObjectByName<FFGlowstick>("Glowstick");
+            UpgradeApplier.mainLantern = FindObjectByName<FFLantern>("Lantern");
+            UpgradeApplier.mainFlashlight = FindObjectByName<FFFlashlight>("Flashlight");
+        }
+        ////get all clonable loot item objects
+        //public static void GetMainMenuLootItems()
+        //{
+        //    FFLootItem[] allItems = UnityEngine.Resources.FindObjectsOfTypeAll<FFLootItem>();
+        //    if (allItems == null)
+        //    {
+        //        MelonLogger.Msg($"NULL");
+        //        return;
+        //    }
+        //    UpgradeApplier.originalLootItemList = allItems;
+
+        //    int count = 0;
+        //    foreach (var item in allItems)
+        //    {
+        //        //sift through valid list
+        //        if (item == null) continue;
+
+        //        try
+        //        {
+        //            if (item.gameObject != null)
+        //            {
+        //                MelonLogger.Msg($"Item[{count}]: {item.name}; Value: {item.value}");
+        //                UpgradeApplier.originalLootItemValuesList[count] = item.value;
+        //            }
+        //        }
+        //        catch
+        //        {
+        //            continue;
+        //        }
+        //        count++;
+        //    }
+        //    MelonLogger.Msg($"Entire Item Value List:");
+        //}
+        //GetMainMenuItems/GetMainMenuLootItems helper
+        public static T FindObjectByName<T>(string name) where T : UnityEngine.Object
+        {
+            foreach (var obj in UnityEngine.Resources.FindObjectsOfTypeAll<T>())
+            {
+                if (obj.name.Equals(name, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    MelonLogger.Msg($"[{name}] loaded!");
+                    return obj;
+                }
+            }
+            return null;
+        }
+
+
+        //upgradestter
         public static List<Upgrade> initUpgrades(List<Upgrade> upgrades)
         {
             //upgrade lists
             if (upgrades == null) upgrades = new List<Upgrade>();
             else upgrades.Clear();
 
-            AddUpgrade(upgrades, "Evader", "Master maneuverability.", loadTextures("evader"),
-                //upgrade start, upgrade max
-                0, 20, new Color(0.737f, 0.718f, 0.353f, 1f),
+            AddUpgrade(upgrades, "Evader", "Run from the inevitable.", loadTextures("evader"),
+                //upgrade start, upgrade max. color
+                0, 5, new Color(1f, 1f, 1f, 1f),
+
                 //cost init, cost scaler
-                //1000, 500, //default
+                //3500, 2000, //real
                 10, 50, //test
+
                 //upgrade scaler
-                5f)
+                10f)
                 ;
 
             AddUpgrade(upgrades, "Lurker", "Become undetectable.", loadTextures("lurker"),
-                0, 3, new Color(0.765f, 0.894f, 0.839f, 1f),
-                //cost init, cost scaler
-                99999, 500,
-                //upgrade scaler
-                0.1f)
-                ;
+                //upgrade start, upgrade max. color
+                0, 5, new Color(1f, 1f, 1f, 1f),
 
-            AddUpgrade(upgrades, "Tinkerer", "Fully utilize resources.", loadTextures("tinkerer"),
-                0, 10, new Color(0.5f, 0.235f, 0.235f, 1f),
                 //cost init, cost scaler
-                99999, 500,
-                //upgrade scaler
-                0.1f)
-                ;
-
-            AddUpgrade(upgrades, "Rummager", "Scavenge greater loot.", loadTextures("rummager"),
-                0, 10, new Color(0.54f, 0.43f, 0.19f, 1f),
-                //cost init, cost scaler
-                99999, 500,
-                //upgrade scaler
-                0.01f)
-                ;
-
-            AddUpgrade(upgrades, "Forerunner", "Ahead of the game.", loadTextures("forerunner"),
-                0, 5, new Color(0.25f, 0.25f, 0.455f, 1f),
-                //cost init, cost scaler
-                //3000, 1500, //default
+                //2500, 1500, //real
                 10, 50, //test
-                        //upgrade scaler
+
+                //upgrade scaler
+                0.1f)
+                ;
+
+            AddUpgrade(upgrades, "Hacker", "Fully utilize your limited resources.", loadTextures("hacker"),
+                //upgrade start, upgrade max. color
+                0, 5, new Color(1f, 1f, 1f, 1f),
+
+                //cost init, cost scaler
+                //3000, 2500, //real
+                10, 50, //test
+
+                //upgrade scaler
+                0.15f)
+                ;
+
+            AddUpgrade(upgrades, "Ransacker", "Scavenge greater loot.", loadTextures("ransacker"),
+                //upgrade start, upgrade max. color
+                0, 5, new Color(1f, 1f, 1f, 1f),
+
+                //cost init, cost scaler
+                //5000, 5000, //real
+                10, 50, //test
+
+                //upgrade scaler
+                //0.05f)
+                5f) //test
+                ;
+
+            AddUpgrade(upgrades, "Forerunner", "Get ahead of your opposition.", loadTextures("forerunner"),
+                //upgrade start, upgrade max. color
+                0, 5, new Color(1f, 1f, 1f, 1f),
+
+                //cost init, cost scaler
+                //5000, 2500, //real
+                10, 50, //test
+
+                //upgrade scaler
                 1f)
                 ;
 
@@ -82,6 +166,7 @@ namespace PlayerUpgrades
 
         public static Texture2D loadTextures(string name)
         {
+            //get path to images
             string path = System.IO.Path.Combine(Application.dataPath, "../UserLibs/Upgrades", name + ".png");
             if (!System.IO.File.Exists(path))
             {

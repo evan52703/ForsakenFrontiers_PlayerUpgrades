@@ -5,7 +5,9 @@ using Il2CppFishNet.Object;
 using Il2Cppmadeinfairyland.fairyengine.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.equipment;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.datadeck;
+using Il2Cppmadeinfairyland.fairyengine.actor;
 using Il2Cppmadeinfairyland.forsakenfrontiers.demo;
 using Il2Cppmadeinfairyland.forsakenfrontiers.hazards;
 using Il2Cppmadeinfairyland.forsakenfrontiers.train;
@@ -28,11 +30,33 @@ namespace PlayerUpgrades
 {
     public class UpgradeApplier
     {
+        //upgs
         public static int indexOfUpgrade = -1;
         public static int costOfUpgrade = -1;
         public static int testVar = 100;
 
-        public static bool localDebug = false;
+        //hacker init
+        //items
+        public static FFSprayTool mainMarker;
+        public static FFBoltcutters mainBoltcutter;
+        public static FFSledgehammer mainSledgehammer;
+        public static FFStunLight mainStunlight;
+
+        public static FFGlowstick mainGlowstick;
+        public static FFLantern mainLantern;
+        public static FFFlashlight mainFlashlight;
+
+        public static int[] originalItemDurabilityValues = { 32, 8, 15, 5 };
+        public static double[] originalItemLightValues = { 6, 15, 28 };
+
+        //loot items
+        //public static FFLootItem[] originalLootItemList;
+        //public static int[] originalLootItemValuesList;
+
+        //debug
+        public static bool localDebug = true;
+
+        public static FFEquipment[] equipment;
 
 
         public static void ServerApplyUpgrade(int index)
@@ -143,30 +167,57 @@ namespace PlayerUpgrades
                     //every instance launches upgrade
                     ApplyUpgradesServer();
                 }
-                //FORERUNNER
+
+                //FORERUNNER & RANSACKER
                 else
                 {
                     if (localDebug) MelonLogger.Msg($"[AT POI] Doors Opened. Attempting Forerunner buff.\n");
 
-                    if (SteamIDUses.IsHost(localSteamID) && !forerunnerUpgradeSet)
+                    if (SteamIDUses.IsHost(localSteamID) && !worldGenUpgradesSet)
                     {
+                        //FORERUNNER
                         //adjust world time based on Forerunner lvl
                         world.Hour -= upgrades[4].upgLvl;
+                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
+
+                        ////RANSACKER
+                        ////
+                        //// THIS SHOULD NOT WORK PROPERLY. STACK EFFECTS WILL ADD UP EVERY POI STOP
+                        //// NEED TO STORE BASE VALUES FOR NON-CLONED SCRAP ITEMS SOMEWEHRE, RESET, THEN APPLY
+                        ////
+                        //FFGenerator[] scraps = UnityEngine.Object.FindObjectsOfType<FFGenerator>();
+                        //foreach (var s in scraps)
+                        //{
+                        //    s.globalChance += (upgrades[3].upgLvl* upgrades[3].upgScaler);
+                        //    if (upgrades[3].upgLvl == upgrades[3].upgLvlMax)
+                        //    {
+                        //        s.maxAmount += 1;
+                        //        s.minAmount += 1;
+                        //    }
+                        //}
+                        
+                        //FairyItem[] scraps2 = UnityEngine.Object.FindObjectsOfType<FairyItem>();
+                        //foreach (var s in scraps2)
+                        //{
+                        //    s.value *= (int)Math.Ceiling(upgrades[3].upgLvl * upgrades[3].upgScaler);
+                        //}
+
+                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
 
                         //tick applied var
-                        forerunnerUpgradeSet = true;
-                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.\n");
+                        worldGenUpgradesSet = true;
+                        if (localDebug) MelonLogger.Msg($"All World UpgradesSet.\n");
                     }
                     else
                     {
-                        if (localDebug) MelonLogger.Msg($"Not Host/Already applied Forerunner Buff.\n");
+                        if (localDebug) MelonLogger.Msg($"Not Host/Already applied worldGen Buffs.\n");
                     }
                 }
             }
         }
 
 
-        private static void ApplyUpgradesServer()
+        public static void ApplyUpgradesServer()
         {
 
 
@@ -188,9 +239,11 @@ namespace PlayerUpgrades
                 }
             }
 
+            if (localDebug) MelonLogger.Msg($"Parsed Train Name.\n");
 
-            // reset vars
-            resetAllVars(myPlayer);
+            //find applicable objects
+            findWorldObjects();
+            if (localDebug) MelonLogger.Msg($"Found World Objects.\n");
 
 
             // apply upgrades
@@ -206,15 +259,9 @@ namespace PlayerUpgrades
                 myPlayer
             );
 
-            applyUpgradeTinkerer(
+            applyUpgradeHacker(
                 upgrades[2].upgLvl,
                 upgrades[2].upgScaler,
-                myPlayer
-            );
-
-            applyUpgradeRummager(
-                upgrades[3].upgLvl,
-                upgrades[3].upgScaler,
                 myPlayer
             );
 
@@ -222,24 +269,34 @@ namespace PlayerUpgrades
             if (localDebug) MelonLogger.Msg($"All upgrades applied.");
         }
 
+        ////Ransacker
+        //[HarmonyPatch(typeof(FFLootItem), nameof(FFLootItem.Initialize))]
+        //public static class FFLootItem_Awake_Patch
+        //{
+        //    public static void Postfix(FFLootItem __instance)
+        //    {
+        //        if (__instance == null || !SteamIDUses.IsHost(localSteamID)) return;
+
+        //        __instance.value = Mathf.CeilToInt(__instance.value * (upgrades[3].upgLvl * 200));
+        //    }
+        //}
+
 
 
         //################################################################################################
-
-
-        private static void resetAllVars(FFPlayer player)
+        private static void findWorldObjects()
         {
-            player.maxStableMoveSpeed = player.StartingMaxStableMoveSpeed;
-            player.staminaDrainRate = player.startingStaminaDrainRate;
-        }
+            //hacker
+            equipment = UnityEngine.Object.FindObjectsOfType<FFEquipment>();
 
+        }
 
         private static void applyUpgradeEvader(int lvl, float scaler, FFPlayer player)
         {
             float statUp = 1 + (lvl * (scaler / 100));
 
-            player.maxStableMoveSpeed *= statUp;
-            player.staminaDrainRate /= statUp;
+            player.maxStableMoveSpeed = player.StartingMaxStableMoveSpeed * statUp;
+            player.staminaDrainRate = player.startingStaminaDrainRate / statUp;
         }
 
 
@@ -249,66 +306,45 @@ namespace PlayerUpgrades
         }
 
 
-        private static void applyUpgradeTinkerer(int lvl, float scaler, FFPlayer player)
+        private static void applyUpgradeHacker(float lvl, float scaler, FFPlayer player)
         {
-            //TODO
+
+            MelonLogger.Msg($"[BEFORE] mainMarker.paint = {mainMarker.paint}");
+            MelonLogger.Msg($"[BEFORE] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
+            MelonLogger.Msg($"[BEFORE] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
+            MelonLogger.Msg($"[BEFORE] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
+
+            MelonLogger.Msg($"[BEFORE] mainGlowstick.light.range = {mainGlowstick.light.range}");
+            MelonLogger.Msg($"[BEFORE] mainLantern.light.range = {mainLantern.light.range}");
+            MelonLogger.Msg($"[BEFORE] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
+
+            MelonLogger.Msg($"Applying Hacker Buff\n");
+
+            //use equipment
+            mainMarker.paint = (int)Math.Ceiling(originalItemDurabilityValues[0] * (1 + (lvl * scaler)));
+            mainBoltcutter.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[1] * (1 + (lvl * scaler)));
+            mainSledgehammer.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[2] * (1 + (lvl * scaler)));
+            mainStunlight.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[3] * (1 + (lvl * scaler)));
+
+            //light equipment
+            mainGlowstick.light.range = (float)(originalItemLightValues[0] * (1 + (lvl * scaler)));
+            mainLantern.light.range = (float)(originalItemLightValues[1] * (1 + (lvl * scaler)));
+            mainFlashlight.light.range = (float)(originalItemLightValues[2] * (1 + (lvl * scaler)));
+
+            MelonLogger.Msg($"[AFTER] mainMarker.paint = {mainMarker.paint}");
+            MelonLogger.Msg($"[AFTER] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
+            MelonLogger.Msg($"[AFTER] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
+            MelonLogger.Msg($"[AFTER] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
+
+            MelonLogger.Msg($"[AFTER] mainGlowstick.light.range = {mainGlowstick.light.range}");
+            MelonLogger.Msg($"[AFTER] mainLantern.light.range = {mainLantern.light.range}");
+            MelonLogger.Msg($"[AFTER] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
+
+            //maybe special could be a chance to not use durability for tools
+
         }
 
 
-        private static void applyUpgradeRummager(int lvl, float scaler, FFPlayer player)
-        {
-            //TODO
-        }
     }
 }
 
-
-//// upgrade requested user gets their local machine
-//if (requestSteamID == localSteamID)
-//{
-//    train.indexHolder = indexOfUpgrade;
-//}
-
-//requestSteamID = 0;
-
-
-//if (train.indexHolder < 0 || train.indexHolder >= upgrades.Count)
-//    return;
-
-
-//// get and level up upgrade
-//var upgrade = upgrades[train.indexHolder];
-
-//if (upgrade.upgLvl >= upgrade.upgLvlMax)
-//    return;
-
-
-//// adjust costs
-//int cost = upgrade.initCost + upgrade.costScaler * upgrade.upgLvl;
-
-//if (train.Credits < cost)
-//    return;
-
-
-//costOfUpgrade = cost;
-
-
-//// update local train level
-//upgrade.upgLvl++;
-
-
-//MelonLogger.Msg($"Train Name before: {train.gameObject.name}");
-//MelonLogger.Msg($"Credits before: {train.Credits}");
-
-
-//// Change server name of train
-//train.gameObject.name =
-//    "UPG:" +
-//    string.Join(",", upgrades.Select(u => u.upgLvl));
-
-
-//// Adjust server credits
-//train.Credits -= costOfUpgrade;
-
-
-// apply upgrades locally

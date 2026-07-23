@@ -494,3 +494,5 @@ C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\o
 C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\obj\Debug\net6.0\refint\PlayerUpgrades.dll
 C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\obj\Debug\net6.0\PlayerUpgrades.pdb
 C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\obj\Debug\net6.0\ref\PlayerUpgrades.dll
+C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\bin\Debug\net6.0\UnityEngine.UnityTestProtocolModule.dll
+C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\ForsakenFrontiers_PlayerUpgrades\bin\Debug\net6.0\Il2CppFORSAKENWATERS.dll
