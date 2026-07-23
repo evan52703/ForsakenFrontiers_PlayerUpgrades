@@ -55,6 +55,7 @@ namespace PlayerUpgrades
 
         //debug
         public static bool localDebug = true;
+        public static int ransackerApplied = 0;
 
         public static FFEquipment[] equipment;
 
@@ -87,6 +88,7 @@ namespace PlayerUpgrades
             [HarmonyPrefix]
             public static void BrakePrefixServer(FFTrainBrake __instance)
             {
+                amIHost = SteamIDUses.IsHost(localSteamID);
                 arrivingToPOI = !arrivingToPOI;
                 if (localDebug)
                 {
@@ -167,52 +169,87 @@ namespace PlayerUpgrades
                     //every instance launches upgrade
                     ApplyUpgradesServer();
                 }
+            }
+            //FORERUNNER
+            [HarmonyPostfix]
+            private static void ApplyForerunnerToWorldTIme()
+            {
+                if (!arrivingToPOI || !train.IsStoppedAtPOI) return;
+                if (localDebug) MelonLogger.Msg($"[AT POI] Doors Opened. Attempting Forerunner buff.");
 
-                //FORERUNNER & RANSACKER
+                if (SteamIDUses.IsHost(localSteamID) && !worldGenUpgradesSet)
+                {
+                    //adjust world time based on Forerunner lvl
+                    world.Hour -= upgrades[4].upgLvl;
+                    if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
+                }
                 else
                 {
-                    if (localDebug) MelonLogger.Msg($"[AT POI] Doors Opened. Attempting Forerunner buff.\n");
+                    if (localDebug) MelonLogger.Msg($"Not Host/Already applied worldGen Buffs.");
+                }
+            }
+            //RANSACKER
+            [HarmonyPostfix]
+            private static void ApplyRansackerToAllWorldLoot()
+            {
+                if (!arrivingToPOI || !train.IsStoppedAtPOI) return;
+                if (localDebug) MelonLogger.Msg($"\n[AT POI] Doors Opened. Attempting Ransacker buff.\n");
 
-                    if (SteamIDUses.IsHost(localSteamID) && !worldGenUpgradesSet)
+
+                if (!SteamIDUses.IsHost(localSteamID) || worldGenUpgradesSet) return;
+
+                //set global buffs attempted var to true HERE
+                //tick applied var
+                worldGenUpgradesSet = true;
+
+                int ransackerLevel = upgrades[3].upgLvl;
+                if (ransackerLevel <= 0)
+                {
+                    if (localDebug) MelonLogger.Msg("[RANSACKER] Upgrade level is 0. Skipping loot buff.");
+                    return;
+                }
+
+                // Find all active, spawned loot instances currently sitting on the map
+                FFLootItem[] spawnedItems = UnityEngine.Object.FindObjectsOfType<FFLootItem>();
+
+                if (spawnedItems == null || spawnedItems.Length == 0)
+                {
+                    MelonLogger.Warning("[RANSACKER] No spawned FFLootItems were found in the scene.");
+                    return;
+                }
+
+                int buffedCount = 0;
+                int buffedLuckyCount = 0;
+                float multiplier = 1f + (ransackerLevel * (upgrades[3].upgScaler / 100f));
+
+                foreach (var item in spawnedItems)
+                {
+                    // Ensure object exists and is an active scene object (ignores uninstantiated asset prefabs)
+                    if (item == null || item.gameObject == null || !item.gameObject.scene.isLoaded)
+                        continue;
+
+                    // Only buff items that actually have a positive value assigned by the game
+                    if (item.value > 0)
                     {
-                        //FORERUNNER
-                        //adjust world time based on Forerunner lvl
-                        world.Hour -= upgrades[4].upgLvl;
-                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
-
-                        ////RANSACKER
-                        ////
-                        //// THIS SHOULD NOT WORK PROPERLY. STACK EFFECTS WILL ADD UP EVERY POI STOP
-                        //// NEED TO STORE BASE VALUES FOR NON-CLONED SCRAP ITEMS SOMEWEHRE, RESET, THEN APPLY
-                        ////
-                        //FFGenerator[] scraps = UnityEngine.Object.FindObjectsOfType<FFGenerator>();
-                        //foreach (var s in scraps)
-                        //{
-                        //    s.globalChance += (upgrades[3].upgLvl* upgrades[3].upgScaler);
-                        //    if (upgrades[3].upgLvl == upgrades[3].upgLvlMax)
-                        //    {
-                        //        s.maxAmount += 1;
-                        //        s.minAmount += 1;
-                        //    }
-                        //}
-                        
-                        //FairyItem[] scraps2 = UnityEngine.Object.FindObjectsOfType<FairyItem>();
-                        //foreach (var s in scraps2)
-                        //{
-                        //    s.value *= (int)Math.Ceiling(upgrades[3].upgLvl * upgrades[3].upgScaler);
-                        //}
-
-                        if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
-
-                        //tick applied var
-                        worldGenUpgradesSet = true;
-                        if (localDebug) MelonLogger.Msg($"All World UpgradesSet.\n");
-                    }
-                    else
-                    {
-                        if (localDebug) MelonLogger.Msg($"Not Host/Already applied worldGen Buffs.\n");
+                        //add lucky loot chance here>
+                        int randNum = UnityEngine.Random.Range(0, 100);
+                        if (randNum == 0) //1%
+                        {
+                            item.value = Mathf.CeilToInt(item.value * (multiplier * 10));
+                            buffedLuckyCount++;
+                            if (localDebug) MelonLogger.Msg($"[RANSACKER] Lucky Multiplier!");
+                        }
+                        else
+                        {
+                            item.value = Mathf.CeilToInt(item.value * multiplier);
+                        }
+                        buffedCount++;
                     }
                 }
+                if (localDebug) MelonLogger.Msg($"[RANSACKER] Successfully buffed {buffedCount}/{spawnedItems.Length} loot items by {multiplier}x multiplier.");
+                if (localDebug) MelonLogger.Msg($"[RANSACKER] Successfully buffed {buffedCount}/{spawnedItems.Length} loot items by {multiplier*10}x lucky multiplier.");
+
+                if (localDebug) MelonLogger.Msg($"All World UpgradesSet.\n");
             }
         }
 
@@ -269,21 +306,6 @@ namespace PlayerUpgrades
             if (localDebug) MelonLogger.Msg($"All upgrades applied.");
         }
 
-        ////Ransacker
-        //[HarmonyPatch(typeof(FFLootItem), nameof(FFLootItem.Initialize))]
-        //public static class FFLootItem_Awake_Patch
-        //{
-        //    public static void Postfix(FFLootItem __instance)
-        //    {
-        //        if (__instance == null || !SteamIDUses.IsHost(localSteamID)) return;
-
-        //        __instance.value = Mathf.CeilToInt(__instance.value * (upgrades[3].upgLvl * 200));
-        //    }
-        //}
-
-
-
-        //################################################################################################
         private static void findWorldObjects()
         {
             //hacker
@@ -293,6 +315,7 @@ namespace PlayerUpgrades
 
         private static void applyUpgradeEvader(int lvl, float scaler, FFPlayer player)
         {
+            if (lvl == 0) return;
             float statUp = 1 + (lvl * (scaler / 100));
 
             player.maxStableMoveSpeed = player.StartingMaxStableMoveSpeed * statUp;
@@ -308,37 +331,49 @@ namespace PlayerUpgrades
 
         private static void applyUpgradeHacker(float lvl, float scaler, FFPlayer player)
         {
+            if (lvl == 0) return;
 
-            MelonLogger.Msg($"[BEFORE] mainMarker.paint = {mainMarker.paint}");
-            MelonLogger.Msg($"[BEFORE] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
-            MelonLogger.Msg($"[BEFORE] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
-            MelonLogger.Msg($"[BEFORE] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainMarker.paint = {mainMarker.paint}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
 
-            MelonLogger.Msg($"[BEFORE] mainGlowstick.light.range = {mainGlowstick.light.range}");
-            MelonLogger.Msg($"[BEFORE] mainLantern.light.range = {mainLantern.light.range}");
-            MelonLogger.Msg($"[BEFORE] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainGlowstick.light.range = {mainGlowstick.light.range}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainLantern.light.range = {mainLantern.light.range}");
+            if (localDebug) MelonLogger.Msg($"[BEFORE] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
 
-            MelonLogger.Msg($"Applying Hacker Buff\n");
+            if (localDebug) MelonLogger.Msg($"Applying Hacker Buff\n");
 
             //use equipment
-            mainMarker.paint = (int)Math.Ceiling(originalItemDurabilityValues[0] * (1 + (lvl * scaler)));
-            mainBoltcutter.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[1] * (1 + (lvl * scaler)));
-            mainSledgehammer.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[2] * (1 + (lvl * scaler)));
-            mainStunlight.maxDurability = (int)Math.Ceiling(originalItemDurabilityValues[3] * (1 + (lvl * scaler)));
+            float statUp = (1 + (lvl * (scaler / 100)));
+            int paintUseIncrease = (int)Math.Ceiling(originalItemDurabilityValues[0] * statUp) - originalItemDurabilityValues[0];
+            int boltUseIncrease = (int)Math.Ceiling(originalItemDurabilityValues[1] * statUp) - originalItemDurabilityValues[1];
+            int sledgeUseIncrease = (int)Math.Ceiling(originalItemDurabilityValues[2] * statUp) - originalItemDurabilityValues[2];
+            int stunUseIncrease = (int)Math.Ceiling(originalItemDurabilityValues[3] * statUp) - originalItemDurabilityValues[3];
+
+            mainMarker.paint = originalItemDurabilityValues[0] + paintUseIncrease;
+            mainBoltcutter.maxDurability = originalItemDurabilityValues[1] + boltUseIncrease;
+            mainSledgehammer.maxDurability = originalItemDurabilityValues[2] + sledgeUseIncrease;
+            mainStunlight.maxDurability = originalItemDurabilityValues[3] + stunUseIncrease;
+
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainMarker.paint = {mainMarker.paint}; +{paintUseIncrease} charges");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}; +{boltUseIncrease} charges");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}; +{sledgeUseIncrease} charges");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainStunlight.maxDurability = {mainStunlight.maxDurability}; +{stunUseIncrease} charges");
+
 
             //light equipment
-            mainGlowstick.light.range = (float)(originalItemLightValues[0] * (1 + (lvl * scaler)));
-            mainLantern.light.range = (float)(originalItemLightValues[1] * (1 + (lvl * scaler)));
-            mainFlashlight.light.range = (float)(originalItemLightValues[2] * (1 + (lvl * scaler)));
+            double glowIncrease = (double)Math.Ceiling(originalItemLightValues[0] * statUp) - originalItemLightValues[0];
+            double lanternIncrease = (double)Math.Ceiling(originalItemLightValues[1] * statUp) - originalItemLightValues[1];
+            double flashIncrease = (double)Math.Ceiling(originalItemLightValues[2] * statUp) - originalItemLightValues[2];
 
-            MelonLogger.Msg($"[AFTER] mainMarker.paint = {mainMarker.paint}");
-            MelonLogger.Msg($"[AFTER] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
-            MelonLogger.Msg($"[AFTER] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
-            MelonLogger.Msg($"[AFTER] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
+            mainGlowstick.light.range = (float)(originalItemLightValues[0] + glowIncrease);
+            mainLantern.light.range = (float)(originalItemLightValues[1] + lanternIncrease);
+            mainFlashlight.light.range = (float)(originalItemLightValues[2] + flashIncrease);
 
-            MelonLogger.Msg($"[AFTER] mainGlowstick.light.range = {mainGlowstick.light.range}");
-            MelonLogger.Msg($"[AFTER] mainLantern.light.range = {mainLantern.light.range}");
-            MelonLogger.Msg($"[AFTER] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainGlowstick.light.range = {mainGlowstick.light.range}; +{glowIncrease}%");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainLantern.light.range = {mainLantern.light.range}; +{lanternIncrease}%");
+            if (localDebug) MelonLogger.Msg($"[AFTER] mainFlashlight.light.range = {mainFlashlight.light.range}; +{flashIncrease}%\n");
 
             //maybe special could be a chance to not use durability for tools
 

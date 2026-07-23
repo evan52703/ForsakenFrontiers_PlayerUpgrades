@@ -28,21 +28,6 @@ namespace PlayerUpgrades
             MelonLogger.Warning($"ERROR: No matching Steam ID found across all players.");
             return null;
         }
-        //public static FFDataDeck findMyDataDeck(ulong localSteamID)
-        //{
-        //    FFPlayer[] players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
-
-        //    foreach (var p in players)
-        //    {
-        //        if (p.SteamID.m_SteamID == localSteamID)
-        //        {
-        //            MelonLogger.Msg($"[STEAM:ID // OUT] {p.SteamID.m_SteamID}");
-        //            return p.DataDeck;
-        //        }
-        //    }
-        //    MelonLogger.Warning($"ERROR: No matching Steam ID found across all players.");
-        //    return null;
-        //}
         public static bool IsHost(ulong localSteamID)
         {
             FFPlayer[] players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
@@ -51,10 +36,12 @@ namespace PlayerUpgrades
             {
                 if (p.SteamID.m_SteamID == localSteamID && p.IsHost)
                 {
+                    //MelonLogger.Msg($"[HOST CHECK] returning true\n");
                     return true;
                 }
             }
             // fail for everybody but host
+            //MelonLogger.Msg($"[HOST CHECK] returning false\n");
             return false;
         }
 

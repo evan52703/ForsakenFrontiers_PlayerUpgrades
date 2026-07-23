@@ -97,6 +97,7 @@ namespace PlayerUpgrades
             {
                 //once scene loaded, allow OnUpdate()
                 amIHost = SteamIDUses.IsHost(localSteamID);
+                MelonLogger.Msg($"Host?: {amIHost}");
                 waitingForSceneObjects = true;
                 inGame = false;
             }
@@ -166,18 +167,18 @@ namespace PlayerUpgrades
             {
                 _menuEnabled = !_menuEnabled;
             }
-            ////testing key
-            //if (Input.GetKeyDown(testingKey) && inGame)
-            //{
-            //    if (SteamIDUses.IsHostList(localSteamID))
-            //    {
-            //        MelonLogger.Msg("You the host chief.");
-            //    }
-            //    else
-            //    {
-            //        MelonLogger.Msg("You no host.");
-            //    }
-            //}
+            //testing key
+            if (Input.GetKeyDown(testingKey) && inGame)
+            {
+                if (SteamIDUses.IsHostList(localSteamID))
+                {
+                    MelonLogger.Msg("You the host chief.");
+                }
+                else
+                {
+                    MelonLogger.Msg("You no host.");
+                }
+            }
 
         }
 

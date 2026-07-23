@@ -90,10 +90,10 @@ namespace PlayerUpgrades
 
                 //cost init, cost scaler
                 //3500, 2000, //real
-                10, 50, //test
+                3500, 3000, //test
 
                 //upgrade scaler
-                10f)
+                8f)
                 ;
 
             AddUpgrade(upgrades, "Lurker", "Become undetectable.", loadTextures("lurker"),
@@ -114,10 +114,10 @@ namespace PlayerUpgrades
 
                 //cost init, cost scaler
                 //3000, 2500, //real
-                10, 50, //test
+                3000, 2500, //test
 
                 //upgrade scaler
-                0.15f)
+                33f)
                 ;
 
             AddUpgrade(upgrades, "Ransacker", "Scavenge greater loot.", loadTextures("ransacker"),
@@ -126,11 +126,11 @@ namespace PlayerUpgrades
 
                 //cost init, cost scaler
                 //5000, 5000, //real
-                10, 50, //test
+                5000, 5000, //test
 
                 //upgrade scaler
                 //0.05f)
-                5f) //test
+                20f) //test
                 ;
 
             AddUpgrade(upgrades, "Forerunner", "Get ahead of your opposition.", loadTextures("forerunner"),
@@ -139,7 +139,7 @@ namespace PlayerUpgrades
 
                 //cost init, cost scaler
                 //5000, 2500, //real
-                10, 50, //test
+                5000, 2500, //test
 
                 //upgrade scaler
                 1f)
