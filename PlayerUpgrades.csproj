@@ -418,6 +418,7 @@
 
 	<ItemGroup>
 		<Compile Include="Core.cs" />
+		<Compile Include="Harmony.cs" />
 		<Compile Include="SaveManager.cs" />
 		<Compile Include="SteamIDUses.cs" />
 		<Compile Include="UpgradeApplier.cs" />

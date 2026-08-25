@@ -148,6 +148,7 @@ namespace PlayerUpgrades
             return upgrades;
         }
 
+
         private static void AddUpgrade(List<Upgrade> list, string name, string description, Texture2D img, int lvl, int lvlMax, Color color, int costInit, int costScaler, float upgScaler)
         {
             var u = new Upgrade();
@@ -162,6 +163,50 @@ namespace PlayerUpgrades
             u.upgScaler = upgScaler;
 
             list.Add(u);
+        }
+
+        public static void UpdateCostsAccToPlayerCount(int numberOfValidPlayers)
+        {
+            MelonLogger.Msg($"[Adjusting LOCAL Upgrade costs based on *{numberOfValidPlayers}* players.]\n\n");
+
+
+            MelonLogger.Msg($"[Initial Upgrade Costs before:    [{upgrades[0].initCost}, {upgrades[1].initCost}, {upgrades[2].initCost}, {upgrades[3].initCost}, {upgrades[4].initCost}]]");
+            MelonLogger.Msg($"[Subsequent Upgrade Costs before: [{upgrades[0].costScaler}, {upgrades[1].costScaler},{upgrades[2].costScaler},{upgrades[3].costScaler},{upgrades[4].costScaler},]]");
+
+            int numOfPlayersForCalc = (numberOfValidPlayers - 1);
+            double multiplyValue = 1;
+            if (numOfPlayersForCalc == 0)
+            {
+                multiplyValue = 1;
+            }
+            else
+            {
+                multiplyValue = (1 + (numOfPlayersForCalc * 0.25f));
+            }
+            //1 = *1
+            //2 = *1.5
+            //3 = *1.75
+            //4 = *2
+
+            //Evader
+            upgrades[0].initCost = (int)Math.Ceiling(3500 * multiplyValue);
+            upgrades[0].costScaler = (int)Math.Ceiling(3000 * multiplyValue);
+            //Lurker
+            upgrades[1].initCost = (int)Math.Ceiling(10 * multiplyValue);
+            upgrades[1].costScaler = (int)Math.Ceiling(50 * multiplyValue);
+            //Hacker
+            upgrades[2].initCost = (int)Math.Ceiling(3000 * multiplyValue);
+            upgrades[2].costScaler = (int)Math.Ceiling(2500 * multiplyValue);
+            //Ransacker
+            upgrades[3].initCost = (int)Math.Ceiling(5000 * multiplyValue);
+            upgrades[3].costScaler = (int)Math.Ceiling(5000 * multiplyValue);
+            //Forerunner
+            upgrades[4].initCost = (int)Math.Ceiling(5000 * multiplyValue);
+            upgrades[4].costScaler = (int)Math.Ceiling(2500 * multiplyValue);
+
+            MelonLogger.Msg($"[Initial Upgrade Costs after:    [{upgrades[0].initCost}, {upgrades[1].initCost}, {upgrades[2].initCost}, {upgrades[3].initCost}, {upgrades[4].initCost}]]");
+            MelonLogger.Msg($"[Subsequent Upgrade Costs after: [{upgrades[0].costScaler}, {upgrades[1].costScaler},{upgrades[2].costScaler},{upgrades[3].costScaler},{upgrades[4].costScaler},]]");
+
         }
 
         public static Texture2D loadTextures(string name)

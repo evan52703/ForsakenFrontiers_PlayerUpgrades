@@ -39,9 +39,14 @@ namespace PlayerUpgrades
                     //MelonLogger.Msg($"[HOST CHECK] returning true\n");
                     return true;
                 }
+                else
+                {
+
+                    MelonLogger.Msg($"[HOST CHECK] || p.SteamID.m_SteamID: {p.SteamID.m_SteamID} || localSteamID: {localSteamID} || p.IsHost: {p.IsHost}\n");
+                }
             }
             // fail for everybody but host
-            //MelonLogger.Msg($"[HOST CHECK] returning false\n");
+            MelonLogger.Msg($"[HOST CHECK] returning false\n");
             return false;
         }
 

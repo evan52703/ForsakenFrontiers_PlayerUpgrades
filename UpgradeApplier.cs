@@ -53,6 +53,9 @@ namespace PlayerUpgrades
         //public static FFLootItem[] originalLootItemList;
         //public static int[] originalLootItemValuesList;
 
+        //store
+        public static int originalCredits;
+
         //debug
         public static bool localDebug = true;
         public static int ransackerApplied = 0;
@@ -63,11 +66,15 @@ namespace PlayerUpgrades
         public static void ServerApplyUpgrade(int index)
         {
 
-            if(localDebug) MelonLogger.Msg($"Triggering train.OpenDoors & requesting credits * 1000.");
+            if (localDebug) MelonLogger.Msg($"Triggering train.OpenDoors & requesting credits * 1000.");
             // open doors for all players on server 
             //ENCODER
             if (train.Credits == 0) train.Credits++; //0 check
 
+            //index
+            // 9 = server upg sync
+            // 8 = server credit sync
+            // 0-4 = specific server upgrade (!)
             int encoded = (train.Credits * 999) + index;
 
             if (localDebug)
@@ -82,176 +89,6 @@ namespace PlayerUpgrades
             train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
         }
 
-        [HarmonyPatch(typeof(FFTrainBrake), nameof(FFTrainBrake.OnUsed))]
-        public static class BrakePrefix
-        {
-            [HarmonyPrefix]
-            public static void BrakePrefixServer(FFTrainBrake __instance)
-            {
-                amIHost = SteamIDUses.IsHost(localSteamID);
-                arrivingToPOI = !arrivingToPOI;
-                if (localDebug)
-                {
-                    MelonLogger.Msg($"\n\nEntered 'FFTrainBrake.OnUsed' Prefix.");
-                    if (arrivingToPOI) MelonLogger.Msg($"Traveling to POI; Disabling Door Decoder\n\n");
-                    else MelonLogger.Msg($"Returning from POI; Enabling Door Decoder\n\n");
-                }
-            }
-        }
-
-        [HarmonyPatch(typeof(FFTrain), nameof(FFTrain.OpenDoors))]
-        public static class DoorsPostfix
-        {
-            [HarmonyPostfix]
-            public static void DoorsPostfixServer(FFTrain __instance)
-            {
-                if (localDebug) MelonLogger.Msg($"Entered 'FFTrain.OpenDoors' Postfix.");
-
-                //not at POI check for not triggering during at POI gameplay
-                if (!arrivingToPOI && !train.IsStoppedAtPOI)
-                {
-                    if (localDebug)
-                    {
-                        MelonLogger.Msg($"[NOT AT POI] Doors Opened. Attempting UpgradeRequest Read/Decode/Apply\n");
-                        MelonLogger.Msg($"[SERVER:BEFORE] __instance.Credits: {__instance.Credits}");
-                        MelonLogger.Msg($"[SERVER:BEFORE] train.Credits: {train.Credits}\n");
-                    }
-                    int index = -1;
-
-                    //DECODER
-                    if (__instance.Credits >= 1000)
-                    {
-                        //DECODER
-                        index = __instance.Credits % 1000;
-                        __instance.Credits -= index;
-                        __instance.Credits /= 1000;
-                        if (__instance.Credits == 1) __instance.Credits -= 1; //0 check
-
-                        train.Credits = __instance.Credits;
-                    }
-
-                    if (localDebug)
-                    {
-                        MelonLogger.Msg($"[SERVER:AFTER] Processing upgrade index: {index}");
-                        MelonLogger.Msg($"[SERVER:AFTER] __instance.Credits: {__instance.Credits}");
-                        MelonLogger.Msg($"[SERVER:AFTER] train.Credits: {train.Credits}\n");
-                    }
-                    //no request
-                    if (index == -1) return;
-
-                    //
-                    //Each client updates their local upgrades
-                    //
-                    // get and level up upgrade
-                    var upgrade = upgrades[index];
-
-                    // adjust costs
-                    int cost = upgrade.initCost + (upgrade.costScaler * upgrade.upgLvl);
-
-                    // update local level and credits
-                    upgrade.upgLvl++;
-
-                    // Adjust server credits        || Optionally update datadeck in future update. Too tall an order currently
-                    __instance.Credits -= cost;
-
-                    // Change server name of train
-                    train.gameObject.name =
-                        "UPG:" +
-                        string.Join(",", upgrades.Select(u => u.upgLvl));
-
-                    if (localDebug)
-                    {
-                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] cost: {cost}");
-                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] __instance.Credits: {__instance.Credits}");
-                        MelonLogger.Msg($"[SERVER:AFTER_UPGRADED] train.Credits: {train.Credits}\n");
-                    }
-
-                    //every instance launches upgrade
-                    ApplyUpgradesServer();
-                }
-            }
-            //FORERUNNER
-            [HarmonyPostfix]
-            private static void ApplyForerunnerToWorldTIme()
-            {
-                if (!arrivingToPOI || !train.IsStoppedAtPOI) return;
-                if (localDebug) MelonLogger.Msg($"[AT POI] Doors Opened. Attempting Forerunner buff.");
-
-                if (SteamIDUses.IsHost(localSteamID) && !worldGenUpgradesSet)
-                {
-                    //adjust world time based on Forerunner lvl
-                    world.Hour -= upgrades[4].upgLvl;
-                    if (localDebug) MelonLogger.Msg($"Forerunner Upg Set.");
-                }
-                else
-                {
-                    if (localDebug) MelonLogger.Msg($"Not Host/Already applied worldGen Buffs.");
-                }
-            }
-            //RANSACKER
-            [HarmonyPostfix]
-            private static void ApplyRansackerToAllWorldLoot()
-            {
-                if (!arrivingToPOI || !train.IsStoppedAtPOI) return;
-                if (localDebug) MelonLogger.Msg($"\n[AT POI] Doors Opened. Attempting Ransacker buff.\n");
-
-
-                if (!SteamIDUses.IsHost(localSteamID) || worldGenUpgradesSet) return;
-
-                //set global buffs attempted var to true HERE
-                //tick applied var
-                worldGenUpgradesSet = true;
-
-                int ransackerLevel = upgrades[3].upgLvl;
-                if (ransackerLevel <= 0)
-                {
-                    if (localDebug) MelonLogger.Msg("[RANSACKER] Upgrade level is 0. Skipping loot buff.");
-                    return;
-                }
-
-                // Find all active, spawned loot instances currently sitting on the map
-                FFLootItem[] spawnedItems = UnityEngine.Object.FindObjectsOfType<FFLootItem>();
-
-                if (spawnedItems == null || spawnedItems.Length == 0)
-                {
-                    MelonLogger.Warning("[RANSACKER] No spawned FFLootItems were found in the scene.");
-                    return;
-                }
-
-                int buffedCount = 0;
-                int buffedLuckyCount = 0;
-                float multiplier = 1f + (ransackerLevel * (upgrades[3].upgScaler / 100f));
-
-                foreach (var item in spawnedItems)
-                {
-                    // Ensure object exists and is an active scene object (ignores uninstantiated asset prefabs)
-                    if (item == null || item.gameObject == null || !item.gameObject.scene.isLoaded)
-                        continue;
-
-                    // Only buff items that actually have a positive value assigned by the game
-                    if (item.value > 0)
-                    {
-                        //add lucky loot chance here>
-                        int randNum = UnityEngine.Random.Range(0, 100);
-                        if (randNum == 0) //1%
-                        {
-                            item.value = Mathf.CeilToInt(item.value * (multiplier * 10));
-                            buffedLuckyCount++;
-                            if (localDebug) MelonLogger.Msg($"[RANSACKER] Lucky Multiplier!");
-                        }
-                        else
-                        {
-                            item.value = Mathf.CeilToInt(item.value * multiplier);
-                        }
-                        buffedCount++;
-                    }
-                }
-                if (localDebug) MelonLogger.Msg($"[RANSACKER] Successfully buffed {buffedCount}/{spawnedItems.Length} loot items by {multiplier}x multiplier.");
-                if (localDebug) MelonLogger.Msg($"[RANSACKER] Successfully buffed {buffedCount}/{spawnedItems.Length} loot items by {multiplier*10}x lucky multiplier.");
-
-                if (localDebug) MelonLogger.Msg($"All World UpgradesSet.\n");
-            }
-        }
 
 
         public static void ApplyUpgradesServer()
@@ -333,16 +170,19 @@ namespace PlayerUpgrades
         {
             if (lvl == 0) return;
 
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainMarker.paint = {mainMarker.paint}");
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[BEFORE] mainMarker.paint = {mainMarker.paint}");
+                MelonLogger.Msg($"[BEFORE] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}");
+                MelonLogger.Msg($"[BEFORE] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}");
+                MelonLogger.Msg($"[BEFORE] mainStunlight.maxDurability = {mainStunlight.maxDurability}");
 
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainGlowstick.light.range = {mainGlowstick.light.range}");
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainLantern.light.range = {mainLantern.light.range}");
-            if (localDebug) MelonLogger.Msg($"[BEFORE] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
+                MelonLogger.Msg($"[BEFORE] mainGlowstick.light.range = {mainGlowstick.light.range}");
+                MelonLogger.Msg($"[BEFORE] mainLantern.light.range = {mainLantern.light.range}");
+                MelonLogger.Msg($"[BEFORE] mainFlashlight.light.range = {mainFlashlight.light.range}\n");
 
-            if (localDebug) MelonLogger.Msg($"Applying Hacker Buff\n");
+                MelonLogger.Msg($"Applying Hacker Buff\n");
+            }
 
             //use equipment
             float statUp = (1 + (lvl * (scaler / 100)));
@@ -356,11 +196,13 @@ namespace PlayerUpgrades
             mainSledgehammer.maxDurability = originalItemDurabilityValues[2] + sledgeUseIncrease;
             mainStunlight.maxDurability = originalItemDurabilityValues[3] + stunUseIncrease;
 
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainMarker.paint = {mainMarker.paint}; +{paintUseIncrease} charges");
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}; +{boltUseIncrease} charges");
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}; +{sledgeUseIncrease} charges");
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainStunlight.maxDurability = {mainStunlight.maxDurability}; +{stunUseIncrease} charges");
-
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[AFTER] mainMarker.paint = {mainMarker.paint}; +{paintUseIncrease} charges");
+                MelonLogger.Msg($"[AFTER] mainBoltcutter.maxDurability = {mainBoltcutter.maxDurability}; +{boltUseIncrease} charges");
+                MelonLogger.Msg($"[AFTER] mainSledgehammer.maxDurability = {mainSledgehammer.maxDurability}; +{sledgeUseIncrease} charges");
+                MelonLogger.Msg($"[AFTER] mainStunlight.maxDurability = {mainStunlight.maxDurability}; +{stunUseIncrease} charges");
+            }
 
             //light equipment
             double glowIncrease = (double)Math.Ceiling(originalItemLightValues[0] * statUp) - originalItemLightValues[0];
@@ -371,15 +213,93 @@ namespace PlayerUpgrades
             mainLantern.light.range = (float)(originalItemLightValues[1] + lanternIncrease);
             mainFlashlight.light.range = (float)(originalItemLightValues[2] + flashIncrease);
 
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainGlowstick.light.range = {mainGlowstick.light.range}; +{glowIncrease}%");
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainLantern.light.range = {mainLantern.light.range}; +{lanternIncrease}%");
-            if (localDebug) MelonLogger.Msg($"[AFTER] mainFlashlight.light.range = {mainFlashlight.light.range}; +{flashIncrease}%\n");
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[AFTER] mainGlowstick.light.range = {mainGlowstick.light.range}; +{glowIncrease}%");
+                MelonLogger.Msg($"[AFTER] mainLantern.light.range = {mainLantern.light.range}; +{lanternIncrease}%");
+                MelonLogger.Msg($"[AFTER] mainFlashlight.light.range = {mainFlashlight.light.range}; +{flashIncrease}%\n");
+            }
 
             //maybe special could be a chance to not use durability for tools
 
         }
 
+        public static void SyncUpgradesAcrossServer()
+        {
+            //credit save
+            originalCredits = train.Credits;
 
+            // #1 Server Upg Sync
+            //
+
+
+            //index dictionary
+            // 9 = server upg sync (!)
+            // 8 = server credit sync
+            // 0-4 = specific server upgrade
+            int index = 9; //server upg sync index
+
+            // parse train name
+            string rawData = train.gameObject.name.Substring(4); // strip "UPG:"
+            string[] levelStrings = rawData.Split(',');
+
+            int compressedUpgInt = 10;
+
+            // update upgrades based on train name
+            for (int i = upgrades.Count-1; i >= 0; i--)
+            {
+                if (i < levelStrings.Length && int.TryParse(levelStrings[i], out int parsedLvl))
+                {
+                    compressedUpgInt += parsedLvl;
+                    compressedUpgInt *= 10;
+                }
+            }
+
+            //complete encoded message for door trigger
+            int encoded = compressedUpgInt + index;
+            encoded -= train.Credits; //credits addition bug workaround
+
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[ENCODE]");
+                MelonLogger.Msg($"Credits: {train.Credits}");
+                MelonLogger.Msg($"Index: {index}");
+                MelonLogger.Msg($"Encoded: {encoded}");
+            }
+            train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
+
+            triggerCreditUpdateSoon = true;
+
+        }
+
+        public static void SyncUpgradesAcrossServer2()
+        {
+
+            // #2 Server Credit Sync
+            // Credits are messed up across the server now from step 1
+            // Sync them back using previously noted original credits and new index
+
+            //index dictionary
+            // 9 = server upg sync
+            // 8 = server credit sync (!)
+            // 0-4 = specific server upgrade
+            int index = 8; //skip index
+            int encoded2 = (originalCredits * 10) + index - 1; //idek why 3500 is being added. ugp cost?
+                                                           // that is ONLY the evader init cost
+
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[ENCODE]");
+                MelonLogger.Msg($"Credits: {train.Credits}");
+                MelonLogger.Msg($"Index: {index}");
+                MelonLogger.Msg($"Encoded: {encoded2}");
+            }
+            train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded2);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
+        }
     }
 }
 
