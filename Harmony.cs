@@ -1,8 +1,12 @@
-﻿using Il2Cppmadeinfairyland.forsakenfrontiers;
+﻿using HarmonyLib;
+using Il2CppFishNet.Managing;
+using Il2Cppmadeinfairyland.fairyengine;
+using Il2Cppmadeinfairyland.fairyengine.ui;
+using Il2Cppmadeinfairyland.forsakenfrontiers;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers.train;
+using Il2Cppmadeinfairyland.forsakenfrontiers.ui.mainmenu;
 using MelonLoader;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,7 +19,6 @@ using System.Xml.Linq;
 using UnityEngine;
 using static PlayerUpgrades.Core;
 using static System.Net.Mime.MediaTypeNames;
-using Il2CppFishNet.Managing;
 
 namespace PlayerUpgrades
 {
@@ -248,30 +251,5 @@ namespace PlayerUpgrades
                 if (localDebug) MelonLogger.Msg($"All World UpgradesSet.\n");
             }
         }
-
-        /*
-        [HarmonyPatch(typeof(FFWorld), nameof(FFCoreManager.OnSaveGame))]
-        public static class UpgradeSaveToFile
-        {
-            [HarmonyPostfix]
-            public static void UpgradeSaveToFileHost(FFWorld __instance)
-            {
-                if (!SteamIDUses.IsHost(localSteamID)) return;
-
-                //int saveFileNumber = FFCoreManager.ELoadSaveType;
-                int saveFileNumber = FFCoreManager.file;
-
-                string path = System.IO.Path.Combine(Application.dataPath, "../UserLibs/FileSaves", "save" + saveFileNumber + ".txt");
-                if (!System.IO.File.Exists(path))
-                {
-                    MelonLogger.Msg($"Upg save file does not exist; creating one...");
-                    System.IO.File.Create(path);
-                }
-
-                System.IO.File.WriteAtPath(path, train.name);
-            }
-
-        }
-        */
     }
 }

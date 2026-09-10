@@ -1,9 +1,11 @@
 ﻿using HarmonyLib;
 using Il2CppFishNet.Broadcast;
+using Il2Cppmadeinfairyland.fairyengine;
 using Il2Cppmadeinfairyland.fairyengine.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.datadeck;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.player.equipment;
 using Il2Cppmadeinfairyland.forsakenfrontiers.hazards;
 using Il2Cppmadeinfairyland.forsakenfrontiers.train;
 using Il2Cppmadeinfairyland.forsakenfrontiers.ui.mainmenu;
@@ -13,7 +15,10 @@ using Il2CppSystem.Runtime.Remoting.Messaging;
 using MelonLoader;
 using MelonLoader.Utils;
 using System.IO;
+using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UIElements;
 using static Il2CppSystem.Array;
 using ImageConversion = UnityEngine.ImageConversion;
 
@@ -93,9 +98,14 @@ namespace PlayerUpgrades
         public static bool triggerCreditUpdateSoon = false;
 
         //saves
-        public static FFSaveFileButton[] Saves = new FFSaveFileButton[4];
-        public static bool[] SaveFound;
-        public static string[] SaveNames ={ "save_1", "save_2", "save_3", "save_4" };
+        public static FairyCoreManager coreManager;
+        public static FFSaveFileButton[] saveButtons;
+        public static string currentHover;
+        public static bool currentSaveFound;
+        public static bool saveLoaded = false;
+        public static int settleSettleTimer = 0;
+        public static bool playerInitSettledSettled = false;
+        public static FFSaveFileButton currentSave = null;
 
         //player
         FFPlayer[] players;
@@ -113,34 +123,17 @@ namespace PlayerUpgrades
                 UpgradeInit.GetMainMenuItems();
                 //waitingForSceneObjects = true;
 
-                /*
-                //Save Detect
-                if (Saves[0] == null)
+                //Find Save Buttons
+                coreManager = UnityEngine.Object.FindObjectOfType<FairyCoreManager>();
+                saveButtons = UnityEngine.Object.FindObjectsOfType<FFSaveFileButton>();
+                saveButtons = saveButtons.OrderBy(b => ExtractSaveNumber(b.saveFile)).ToArray();
+
+                //display each save
+                int count = 0;
+                foreach (var save in saveButtons)
                 {
-                    // Reset arrays to clear old destroyed references
-                    Array.Clear(Saves, 0, Saves.Length);
-                    Array.Clear(SaveFound, 0, SaveFound.Length);
-
-                    // Find buttons and sort them by name or hierarchy (e.g. "save_1", "save_2")
-                    FFSaveFileButton[] saveButtons = UnityEngine.Object.FindObjectsOfType<FFSaveFileButton>()
-                        .OrderBy(b => b.gameObject.name) // Sort to ensure consistent array positions
-                        .ToArray();
-
-                    //detect and store save files
-                    int count = 0;
-                    foreach (var save in saveButtons)
-                    {
-                        //store the save object
-                        Saves[count] = save;
-
-                        //if the save is currently used
-                        if (save.FoundSave)
-                        {
-                            SaveFound[count] = true;
-                        }
-                        count++;
-                    }
-                }*/
+                    MelonLogger.Msg($"{save.saveFile}");
+                }
 
                 /////////////////////////////////////
                 /////
@@ -177,12 +170,23 @@ namespace PlayerUpgrades
 
             }
 
+            int ExtractSaveNumber(string saveFileName)
+            {
+                //splits save_1 for example to 2 strings: "save" and "1"
+                string[] parts = saveFileName.Split('_');
+
+                //TryParse converts a string numeral to its 32bit int counterpart
+                return int.TryParse(parts[1], out int id) ? id : 0;
+            }
+
             if (sceneName == "Forsaken Frontiers")
             {
                 //once scene loaded, allow OnUpdate()
                 amIHost = SteamIDUses.IsHost(localSteamID);
                 waitingForSceneObjects = true;
                 inGame = false;
+                MelonLogger.Msg($"Save File to Load: {currentHover}");
+                MelonLogger.Msg($"Save File Found? {currentSaveFound}");
 
             }
             else
@@ -198,6 +202,12 @@ namespace PlayerUpgrades
                 settleTimer = 0;
                 truePlayerCount = 0;
                 playerInitSettled = false;
+
+                saveLoaded = false;
+                settleSettleTimer = 0;
+                playerInitSettledSettled = false;
+                currentSave = null;
+
             }
         }
 
@@ -205,6 +215,33 @@ namespace PlayerUpgrades
         public override void OnUpdate()
         {
             //detect save file
+            if (!inGame)
+            {
+                foreach (var save in saveButtons)
+                {
+                    //any save
+                    if (save.IsHovering && save.SaveFile != currentHover)
+                    {
+                        currentHover = save.saveFile;
+                        currentSave = save;
+                        MelonLogger.Msg($"Save file: '{currentHover}' hovered.");
+                    }
+                    //special case for deleting previous save and never touching other buttons
+                    else if (save.IsHovering && save.SaveFile == currentHover)
+                    {
+                        currentHover = save.saveFile;
+                        currentSave = save;
+                        MelonLogger.Msg($"Save file: '{currentHover}' REhovered.");
+                    }
+                }
+                if (currentSave != null)
+                {
+                    //check every frame
+                    currentSaveFound = currentSave.FoundSave;
+                    MelonLogger.Msg($"Save found? '{currentSaveFound}'");
+                }
+            }
+
 
             // load world and train into vars
             if (waitingForSceneObjects)
@@ -214,37 +251,6 @@ namespace PlayerUpgrades
 
                 if (world != null && train != null)
                 {
-
-                    //if (SteamIDUses.IsHost(localSteamID))
-                    //{
-                    //
-                    //      FILE SAVE STUFF;     DO ANOTHER TIME
-                    //
-                    //    if (File exists at path){
-
-                    //        // parse train name
-                    //        string rawData1 = ReadLineFromFile(path);
-                    //        string rawData2 = rawData1.Substring(4); // strip "UPG:"
-                    //        string[] levelStrings = rawData.Split(',');
-
-
-                    //        // update upgrades based on train name
-                    //        for (int i = 0; i < upgrades.Count && i < levelStrings.Length; i++)
-                    //        {
-                    //            if (int.TryParse(levelStrings[i], out int parsedLvl))
-                    //            {
-                    //                upgrades[i].upgLvl = parsedLvl;
-                    //            }
-                    //        }
-                    //        UpgradeApplier.ApplyUpgradesServer();
-                    //    }
-                    //    else
-                    //    {
-                    //        train.name = "UPG:0,0,0,0,0";
-                    //        upgrades = UpgradeInit.initUpgrades(upgrades);
-
-                    //    }
-                    //}
                     upgrades = UpgradeInit.initUpgrades(upgrades);
 
                     if (!train.name.StartsWith("UPG:"))
@@ -260,15 +266,6 @@ namespace PlayerUpgrades
                     inGame = true; // run mod features
                 }
                 return;
-            }
-
-            if (Input.GetKeyDown(testingKey))
-            {
-                //get non-clone objects
-                //also sets boltcutter var to test
-                UpgradeInit.GetMainMenuItems();
-                //UpgradeInit.GetMainMenuLootItems();
-                MelonLogger.Msg("Objects set.");
             }
 
             if (!inGame || train == null) return;
@@ -339,6 +336,78 @@ namespace PlayerUpgrades
                     triggerCreditUpdateSoon = false;
                     triggerTimer = 0;
                 }
+            }
+
+            if (settleSettleTimer < 60) settleSettleTimer++;
+            else playerInitSettledSettled = true;
+
+            //save loader
+            if (playerInitSettledSettled && currentSaveFound && !saveLoaded)
+            {
+                saveLoaded = true;
+                MelonLogger.Msg("Entered SaveLoader WITH SAVE...");
+
+                //Host only loads save
+                if (SteamIDUses.IsHost(localSteamID))
+                {
+                    string path = System.IO.Path.Combine(Application.dataPath, "../UserLibs/Saves", currentHover + ".txt");
+
+                    if (!System.IO.File.Exists(path))
+                    {
+                        MelonLogger.Msg("[!] FILE NOT FOUND");
+                        return;
+                    }
+
+                    string fileContent = System.IO.File.ReadAllText(path);
+
+                    int[] numbers = Regex.Matches(fileContent, @"\d")
+                            .Cast<Match>()
+                            .Select(m => int.Parse(m.Value))
+                            .Take(5)
+                            .ToArray();
+
+                    for (var i = 0; i < 5; i++)
+                    {
+                        upgrades[i].upgLvl = numbers[i];
+                    }
+
+                    // Change server name of train
+                    train.gameObject.name =
+                    "UPG:" +
+                        string.Join(",", upgrades.Select(u => u.upgLvl));
+
+                    MelonLogger.Msg($"[!] UPGRADES FOUND: {numbers[0]},{numbers[1]},{numbers[2]},{numbers[3]},{numbers[4]}");
+                    MelonLogger.Msg($"[!] TRAIN NAME: {train.gameObject.name}");
+                    UpgradeApplier.SyncUpgradesAcrossServer();
+                }
+                else
+                {
+                    MelonLogger.Msg("NOT HOST");
+                }
+
+            }
+
+            //save doesnt exist and file has upgs in it
+            else if (playerInitSettledSettled && !currentSaveFound && !saveLoaded)
+            {
+                saveLoaded = true;
+                MelonLogger.Msg("Entered SaveLoader WITHOUT SAVE...");
+
+                //Host only loads save
+                if (SteamIDUses.IsHost(localSteamID))
+                {
+                    string path = System.IO.Path.Combine(Application.dataPath, "../UserLibs/Saves", currentHover + ".txt");
+
+                    string contentToWrite = "00000";
+                    System.IO.File.WriteAllText(path, contentToWrite);
+
+                    MelonLogger.Msg($"[!] {currentHover} RESET");
+                }
+                else
+                {
+                    MelonLogger.Msg("NOT HOST");
+                }
+
             }
 
             //enable/disable menu

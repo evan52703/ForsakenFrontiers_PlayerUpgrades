@@ -93,7 +93,16 @@ namespace PlayerUpgrades
 
         public static void ApplyUpgradesServer()
         {
+            //overwrite save file upgrade list
+            //Host only overwrites save
+            if (SteamIDUses.IsHost(localSteamID) && playerInitSettledSettled)
+            {
+                string savePath = System.IO.Path.Combine(Application.dataPath, "../UserLibs/Saves", currentHover + ".txt");
+                string contentToWrite = string.Join("", upgrades.Take(5).Select(u => u.upgLvl));
 
+                System.IO.File.WriteAllText(savePath, contentToWrite);
+                MelonLogger.Msg($"OVERWROTE {currentHover}.\n");
+            }
 
             // get my player
             FFPlayer myPlayer = SteamIDUses.findMyPlayer(Core.localSteamID);
