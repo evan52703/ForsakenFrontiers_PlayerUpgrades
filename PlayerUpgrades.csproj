@@ -13,6 +13,83 @@
 		<LangVersion>latest</LangVersion>
 		<ImplicitUsings>enable</ImplicitUsings>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="blank.png" />
+	  <None Remove="DungeonFont.ttf" />
+	  <None Remove="evader1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader1-crt.png" />
+	  <None Remove="evader2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader2-crt.png" />
+	  <None Remove="evader3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader3-crt.png" />
+	  <None Remove="evader4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader4-crt.png" />
+	  <None Remove="evader5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader5-crt.png" />
+	  <None Remove="evader6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="evader6-crt.png" />
+	  <None Remove="images\evader1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader1-crt.png" />
+	  <None Remove="images\evader2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader2-crt.png" />
+	  <None Remove="images\evader3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader3-crt.png" />
+	  <None Remove="images\evader4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader4-crt.png" />
+	  <None Remove="images\evader5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader5-crt.png" />
+	  <None Remove="images\evader6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\evader6-crt.png" />
+	  <None Remove="images\forerunner1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner1-crt.png" />
+	  <None Remove="images\forerunner2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner2-crt.png" />
+	  <None Remove="images\forerunner3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner3-crt.png" />
+	  <None Remove="images\forerunner4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner4-crt.png" />
+	  <None Remove="images\forerunner5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner5-crt.png" />
+	  <None Remove="images\forerunner6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\forerunner6-crt.png" />
+	  <None Remove="images\lurker1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker1-crt.png" />
+	  <None Remove="images\lurker2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker2-crt.png" />
+	  <None Remove="images\lurker3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker3-crt.png" />
+	  <None Remove="images\lurker4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker4-crt.png" />
+	  <None Remove="images\lurker5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker5-crt.png" />
+	  <None Remove="images\lurker6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\lurker6-crt.png" />
+	  <None Remove="images\nightterror.png" />
+	  <None Remove="images\ransacker1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker1-crt.png" />
+	  <None Remove="images\ransacker2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker2-crt.png" />
+	  <None Remove="images\ransacker3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker3-crt.png" />
+	  <None Remove="images\ransacker4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker4-crt.png" />
+	  <None Remove="images\ransacker5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker5-crt.png" />
+	  <None Remove="images\ransacker6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\ransacker6-crt.png" />
+	  <None Remove="images\supplier1-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier1-crt.png" />
+	  <None Remove="images\supplier2-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier2-crt.png" />
+	  <None Remove="images\supplier3-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier3-crt.png" />
+	  <None Remove="images\supplier4-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier4-crt.png" />
+	  <None Remove="images\supplier5-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier5-crt.png" />
+	  <None Remove="images\supplier6-crt-vhs-camcorder-effect.png" />
+	  <None Remove="images\supplier6-crt.png" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp-firstpass">
@@ -424,6 +501,72 @@
 		<Compile Include="UpgradeApplier.cs" />
 		<Compile Include="UpgradeInit.cs" />
 		<Compile Include="C:\Users\evant\OneDrive\Desktop\Mods\Forsaken\SAVES\UpgradeMenu.cs" Link="UpgradeMenu.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="images\blank.png" />
+	  <EmbeddedResource Include="DungeonFont.ttf" />
+	  <EmbeddedResource Include="images\evader1-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader1-crt.png" />
+	  <EmbeddedResource Include="images\evader2-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader2-crt.png" />
+	  <EmbeddedResource Include="images\evader3-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader3-crt.png" />
+	  <EmbeddedResource Include="images\evader4-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader4-crt.png" />
+	  <EmbeddedResource Include="images\evader5-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader5-crt.png" />
+	  <EmbeddedResource Include="images\evader6-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\evader6-crt.png" />
+	  <EmbeddedResource Include="images\forerunner1-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner1-crt.png" />
+	  <EmbeddedResource Include="images\forerunner2-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner2-crt.png" />
+	  <EmbeddedResource Include="images\forerunner3-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner3-crt.png" />
+	  <EmbeddedResource Include="images\forerunner4-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner4-crt.png" />
+	  <EmbeddedResource Include="images\forerunner5-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner5-crt.png" />
+	  <EmbeddedResource Include="images\forerunner6-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\forerunner6-crt.png" />
+	  <EmbeddedResource Include="images\lurker1-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker1-crt.png" />
+	  <EmbeddedResource Include="images\lurker2-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker2-crt.png" />
+	  <EmbeddedResource Include="images\lurker3-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker3-crt.png" />
+	  <EmbeddedResource Include="images\lurker4-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker4-crt.png" />
+	  <EmbeddedResource Include="images\lurker5-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker5-crt.png" />
+	  <EmbeddedResource Include="images\lurker6-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\lurker6-crt.png" />
+	  <EmbeddedResource Include="images\nightterror.png" />
+	  <EmbeddedResource Include="images\ransacker1-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker1-crt.png" />
+	  <EmbeddedResource Include="images\ransacker2-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker2-crt.png" />
+	  <EmbeddedResource Include="images\ransacker3-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker3-crt.png" />
+	  <EmbeddedResource Include="images\ransacker4-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker4-crt.png" />
+	  <EmbeddedResource Include="images\ransacker5-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker5-crt.png" />
+	  <EmbeddedResource Include="images\ransacker6-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\ransacker6-crt.png" />
+	  <EmbeddedResource Include="images\supplier1-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier1-crt.png" />
+	  <EmbeddedResource Include="images\supplier2-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier2-crt.png" />
+	  <EmbeddedResource Include="images\supplier3-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier3-crt.png" />
+	  <EmbeddedResource Include="images\supplier4-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier4-crt.png" />
+	  <EmbeddedResource Include="images\supplier5-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier5-crt.png" />
+	  <EmbeddedResource Include="images\supplier6-crt-vhs-camcorder-effect.png" />
+	  <EmbeddedResource Include="images\supplier6-crt.png" />
 	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">

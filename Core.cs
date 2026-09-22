@@ -61,7 +61,7 @@ namespace PlayerUpgrades
 
         //menus
         private bool _menuEnabled = false;
-        public bool inGame = false;
+        public static bool inGame = false;
         private KeyCode menuKey = KeyCode.F2;
         private KeyCode testingKey = KeyCode.T;
 
@@ -85,7 +85,7 @@ namespace PlayerUpgrades
         public static bool debug = false;
         public static FFTrain train;
         public static FFWorld world;
-        private bool waitingForSceneObjects = false;
+        public static bool waitingForSceneObjects = false;
         public static bool arrivingToPOI = false;
         public static bool amIHost = false;
 
@@ -96,6 +96,14 @@ namespace PlayerUpgrades
 
         public static int triggerTimer = 0;
         public static bool triggerCreditUpdateSoon = false;
+
+        public static bool containersSet = false;
+
+        public static int brokenMinChance = 0;
+        public static bool brokenMinConsecutive = false;
+        public static bool consecutiveTick = false;
+        public static int minute = 0;
+        public static int hour = 6;
 
         //saves
         public static FairyCoreManager coreManager;
@@ -108,7 +116,7 @@ namespace PlayerUpgrades
         public static FFSaveFileButton currentSave = null;
 
         //player
-        FFPlayer[] players;
+        public static FFPlayer[] players;
         public static int truePlayerCount = 0; //host only
         public static float playerCheckTimer;
 
@@ -117,10 +125,12 @@ namespace PlayerUpgrades
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
+            //MENU LOAD
             if (sceneName == "Main Menu")
             {
                //main menu items init
                 UpgradeInit.GetMainMenuItems();
+                UpgradeInit.GetMainMenuEnemies();
                 //waitingForSceneObjects = true;
 
                 //Find Save Buttons
@@ -135,41 +145,10 @@ namespace PlayerUpgrades
                     MelonLogger.Msg($"{save.saveFile}");
                 }
 
-                /////////////////////////////////////
-                /////
-                /////   Now we have each save button in 'saveButtons'
-                /////   and whether or not they are being used.
-                /////   
-                /////   How to make saving work:
-                /////
-                /////   1. Use On Update to find: any save file buttons having StartSelected as true
-                /////   2. As soon as you do, break from that; then: 
-                /////       Find the corresponding "SaveFile" string name of the StartSelected SaveFileButton.
-                /////       EX: if SaveFileButton 1 has StartSelected & Found as true from On Update, fileName = SaveFound 
-                /////
-                /////           if (save.StartSelected)
-                /////               if (save.Found)
-                /////                   string saveName = SaveNames[saveWeAreTesting'sIndex]
-                /////                   ***saveName = save_3*** = example
-                /////          CRITICAL: store saveName in local var for step 5. so we dont have to search again
-                /////                   LoadTrainNameInSave(saveName)
-                /////
-                /////   3. LoadTrainNameInSave function reads directory created file for save_3 when 
-                /////       game last closed for that save, reads and stores train name in local variable.
-                /////
-                /////   4. When scene loads and train is initialized
-                /////       - make it's name = the local variable from step 3.
-                /////       - run OpenDoors Harmony with index == 9 for upgrade sync
-                /////
-                ///// ---------------------------------------------------------------------
-                /////
-                /////   5. On ingame close, read CRITICAL local var with saveName from step 3,
-                /////       write to that save locally with current train name, then safely exit.
-                /////   
-                //////////////////////////////////////
 
             }
 
+            //save number extractor when entering games
             int ExtractSaveNumber(string saveFileName)
             {
                 //splits save_1 for example to 2 strings: "save" and "1"
@@ -179,6 +158,7 @@ namespace PlayerUpgrades
                 return int.TryParse(parts[1], out int id) ? id : 0;
             }
 
+            //INGAME LOAD
             if (sceneName == "Forsaken Frontiers")
             {
                 //once scene loaded, allow OnUpdate()
@@ -189,6 +169,7 @@ namespace PlayerUpgrades
                 MelonLogger.Msg($"Save File Found? {currentSaveFound}");
 
             }
+            //NOT IN GAME LOAD
             else
             {
                 //reset vars if not in-game
@@ -198,6 +179,7 @@ namespace PlayerUpgrades
                 upgradeSelected = null;
                 _menuEnabled = false;
                 waitingForSceneObjects = false;
+                arrivingToPOI = false;
 
                 settleTimer = 0;
                 truePlayerCount = 0;
@@ -207,12 +189,86 @@ namespace PlayerUpgrades
                 settleSettleTimer = 0;
                 playerInitSettledSettled = false;
                 currentSave = null;
+                amIHost = false;
+                doNotProcessCreditsOrUpgrades = false;
+
+                settleTimer = 0;
+                playerInitSettled = false;
+
+                triggerTimer = 0;
+                triggerCreditUpdateSoon = false;
+
+                containersSet = false;
+
+                minute = 0;
+                hour = 0;
+                brokenMinConsecutive = false;
+                consecutiveTick = false;
+
 
             }
+
         }
 
         //triggers every frame
         public override void OnUpdate()
+        {
+            saveDetector();
+            loadWorldVars();
+            if (!inGame || train == null) return;
+
+            //do not run until set
+            forerunnerVarReset();
+            if (playerInitSettled && SteamIDUses.IsHost(localSteamID) && upgrades[4].upgLvl >= 2 && train.IsStoppedAtPOI) forerunnerBrokenMinuteTimer();
+            playerAmountChange();
+            runTimers();
+            saveLoader();
+
+            //enable/disable menu
+            if (Input.GetKeyDown(menuKey) && inGame)
+            {
+                _menuEnabled = !_menuEnabled;
+            }
+
+            //texture randomizer
+            if (upgradeSelected != null)
+            {
+                int randomInt = UnityEngine.Random.Range(1, 201);
+
+                string textureName;
+                if (randomInt >= 198) textureName = "blank";
+                else if (randomInt >= 60 )textureName = upgradeSelected.upgName + (upgradeSelected.upgLvl + 1).ToString() + "-crt";
+                else textureName = upgradeSelected.upgName + (upgradeSelected.upgLvl + 1).ToString() + "-crt-vhs-camcorder-effect";
+
+                upgradeSelected.upgImg = UpgradeInit.loadTextures(textureName);
+            }
+        }
+
+        public override void OnGUI()
+        {
+            // Silent return. No console spam while waiting for components to load.
+            if (!inGame || train == null)
+            {
+                return;
+            }
+
+            if (train.IsStoppedAtPOI || arrivingToPOI)
+            {
+                _menuEnabled = false; //closes menu when not at POI
+                upgradeSelected = null; //resets selection when not at POI
+                GUI.Box(new Rect(x_adj, y_adj, 180, 50), "<b>Player Upgrades</b>\nUnavailable");
+            }
+            else if (!_menuEnabled)
+            {
+                GUI.Box(new Rect(x_adj, y_adj, 180, 50), $"<b>Player Upgrades</b>\n[{menuKey}] to Open");
+            }
+            else
+            {
+                // Hand off the work to our separate class
+                UpgradeMenu.Draw(upgrades, ref upgradeSelected);
+            }
+        }
+        public static void saveDetector()
         {
             //detect save file
             if (!inGame)
@@ -241,7 +297,9 @@ namespace PlayerUpgrades
                     MelonLogger.Msg($"Save found? '{currentSaveFound}'");
                 }
             }
-
+        }
+        public static void loadWorldVars()
+        {
 
             // load world and train into vars
             if (waitingForSceneObjects)
@@ -267,14 +325,55 @@ namespace PlayerUpgrades
                 }
                 return;
             }
-
-            if (!inGame || train == null) return;
-
+        }
+        public static void forerunnerVarReset()
+        {
             //forerunner var reset
             if (!train.IsStoppedAtPOI && worldGenUpgradesSet)
             {
+                MelonLogger.Msg($"\n[RANSACKER] worldGenUpgradesSet PROPERLY RESET.\n");
                 worldGenUpgradesSet = false;
+                MelonLogger.Msg($"\n[GENERAL] atPOI var reset too.\n");
+                arrivingToPOI = false;
             }
+        }
+        public static void forerunnerBrokenMinuteTimer()
+        {
+            //when time changes
+            if (minute != world.Minute)
+            {
+                //if lvl 5 or hasn't already triggered this minute
+                if (!consecutiveTick || brokenMinConsecutive)
+                {
+                    //roll to roll back a minute
+                    int randomInt = UnityEngine.Random.Range(1, 101);
+                    if (randomInt <= brokenMinChance)
+                    {
+                        //rollback and tick consecutive tick for no consecutive broken min
+                        MelonLogger.Msg($"[FORERUNNER] BROKEN MINUTE");
+
+                        //these 2 need to be called into harmony
+                        world.Minute = minute; //IN HARMONY
+                        world.Hour = hour;     //IN HARMONY
+
+                        consecutiveTick = true;
+                    }
+                    //if roll fails, update minute and continue
+                    else
+                    {
+                        minute = world.Minute;
+                        hour = world.Hour;
+                    }
+                }
+                //subsequent broken min ticks will not occur without lvl 5
+                else
+                {
+                    consecutiveTick = false;
+                }
+            }
+        }
+        public static void playerAmountChange()
+        {
 
             //player detector
             playerCheckTimer += Time.deltaTime;
@@ -284,9 +383,7 @@ namespace PlayerUpgrades
                 players = UnityEngine.Object.FindObjectsOfType<FFPlayer>();
             }
 
-            if (settleTimer < 6) settleTimer++;
-            else playerInitSettled = true;
-
+            //player change detector
             if (inGame && playerInitSettled && !train.IsStoppedAtPOI)
             {
                 //check if player count changes every frame
@@ -325,7 +422,19 @@ namespace PlayerUpgrades
                     }
                 }
             }
+        }
+        public static void runTimers()
+        {
 
+            //player init settle 1
+            if (settleTimer < 6) settleTimer++;
+            else playerInitSettled = true;
+
+            //player init settle 2
+            if (settleSettleTimer < 60) settleSettleTimer++;
+            else playerInitSettledSettled = true;
+
+            //ladder credit trigger
             if (triggerCreditUpdateSoon)
             {
                 triggerTimer++;
@@ -337,10 +446,9 @@ namespace PlayerUpgrades
                     triggerTimer = 0;
                 }
             }
-
-            if (settleSettleTimer < 60) settleSettleTimer++;
-            else playerInitSettledSettled = true;
-
+        }
+        public static void saveLoader()
+        {
             //save loader
             if (playerInitSettledSettled && currentSaveFound && !saveLoaded)
             {
@@ -408,50 +516,6 @@ namespace PlayerUpgrades
                     MelonLogger.Msg("NOT HOST");
                 }
 
-            }
-
-            //enable/disable menu
-            if (Input.GetKeyDown(menuKey) && inGame)
-            {
-                _menuEnabled = !_menuEnabled;
-            }
-            //testing key
-            if (Input.GetKeyDown(testingKey) && inGame)
-            {
-                if (SteamIDUses.IsHostList(localSteamID))
-                {
-                    MelonLogger.Msg("You the host chief.");
-                }
-                else
-                {
-                    MelonLogger.Msg("You no host.");
-                }
-            }
-
-        }
-
-        public override void OnGUI()
-        {
-            // Silent return. No console spam while waiting for components to load.
-            if (!inGame || train == null)
-            {
-                return;
-            }
-
-            if (train.IsStoppedAtPOI)
-            {
-                _menuEnabled = false; //closes menu when not at POI
-                upgradeSelected = null; //resets selection when not at POI
-                GUI.Box(new Rect(x_adj, y_adj, 180, 50), "<b>Player Upgrades</b>\nUnavailable");
-            }
-            else if (!_menuEnabled)
-            {
-                GUI.Box(new Rect(x_adj, y_adj, 180, 50), $"<b>Player Upgrades</b>\n[{menuKey}] to Open");
-            }
-            else
-            {
-                // Hand off the work to our separate class
-                UpgradeMenu.Draw(upgrades, ref upgradeSelected);
             }
         }
         public static void UpdateCostsAccToPlayerCount(int playerCount)

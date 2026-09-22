@@ -11,6 +11,19 @@ using System.Threading.Tasks;
 using UnityEngine;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static PlayerUpgrades.Core;
+using System.IO;
+using System.Reflection;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.Packrat;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.Mist;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.Carrier;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.theabandonedone;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.shambler;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.ventress;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai.butcher;
+using Il2Cppmadeinfairyland.forsakenfrontiers.actor.ai;
 
 namespace PlayerUpgrades
 {
@@ -29,39 +42,6 @@ namespace PlayerUpgrades
             UpgradeApplier.mainLantern = FindObjectByName<FFLantern>("Lantern");
             UpgradeApplier.mainFlashlight = FindObjectByName<FFFlashlight>("Flashlight");
         }
-        ////get all clonable loot item objects
-        //public static void GetMainMenuLootItems()
-        //{
-        //    FFLootItem[] allItems = UnityEngine.Resources.FindObjectsOfTypeAll<FFLootItem>();
-        //    if (allItems == null)
-        //    {
-        //        MelonLogger.Msg($"NULL");
-        //        return;
-        //    }
-        //    UpgradeApplier.originalLootItemList = allItems;
-
-        //    int count = 0;
-        //    foreach (var item in allItems)
-        //    {
-        //        //sift through valid list
-        //        if (item == null) continue;
-
-        //        try
-        //        {
-        //            if (item.gameObject != null)
-        //            {
-        //                MelonLogger.Msg($"Item[{count}]: {item.name}; Value: {item.value}");
-        //                UpgradeApplier.originalLootItemValuesList[count] = item.value;
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            continue;
-        //        }
-        //        count++;
-        //    }
-        //    MelonLogger.Msg($"Entire Item Value List:");
-        //}
         //GetMainMenuItems/GetMainMenuLootItems helper
         public static T FindObjectByName<T>(string name) where T : UnityEngine.Object
         {
@@ -76,6 +56,70 @@ namespace PlayerUpgrades
             return null;
         }
 
+        //get all clonable enemy objects
+        public static void GetMainMenuEnemies()
+        {
+            UpgradeApplier.mainSpider = FindObjectByName<FFSpiderAI>("The Spider");
+            UpgradeApplier.mainVentress = FindObjectByName<FFVentressAI>("The Ventress");
+            UpgradeApplier.mainNButcher = FindObjectByName<FFButcherAI>("Nightmare Butcher");
+            UpgradeApplier.mainForsaken = FindObjectByName<FFForsakenAI>("The Forsaken ECD");
+            UpgradeApplier.mainShambler = FindObjectByName<FFShambler>("The Shambler");
+            UpgradeApplier.mainAbandoned = FindObjectByName<FFTheAbandonedOneAI>("The Abandoned One");
+            UpgradeApplier.mainPatient = FindObjectByName<FFForsakenAI>("The Forsaken (Patient)");
+            UpgradeApplier.mainCarrier = FindObjectByName<FFCarrierAI>("The Carrier");
+            UpgradeApplier.mainButcher = FindObjectByName<FFButcherAI>("The Butcher");
+            UpgradeApplier.mainNShambler = FindObjectByName<FFShambler>("Nightmare Shambler");
+            UpgradeApplier.mainNSpider = FindObjectByName<FFSpiderAI>("Nightmare Spider");
+            UpgradeApplier.mainShepherd = FindObjectByName<FFMistAI>("The Shepherd");
+            UpgradeApplier.mainPackrat = FindObjectByName<FFPackratAI>("The Packrat");
+
+            UpgradeApplier.initDetectRadius = [
+                UpgradeApplier.mainSpider.checkFarPlayerRadius,
+                UpgradeApplier.mainVentress.checkFarPlayerRadius,
+                UpgradeApplier.mainNButcher.checkFarPlayerRadius,
+                UpgradeApplier.mainForsaken.checkFarPlayerRadius,
+                UpgradeApplier.mainShambler.checkFarPlayerRadius,
+                UpgradeApplier.mainAbandoned.checkFarPlayerRadius,
+                UpgradeApplier.mainPatient.checkFarPlayerRadius,
+                UpgradeApplier.mainCarrier.checkFarPlayerRadius,
+                UpgradeApplier.mainButcher.checkFarPlayerRadius,
+                UpgradeApplier.mainNShambler.checkFarPlayerRadius,
+                UpgradeApplier.mainShepherd.checkFarPlayerRadius,
+                UpgradeApplier.mainPackrat.checkFarPlayerRadius
+            ]
+            ;
+            UpgradeApplier.initDetectChance = [
+
+                (int)UpgradeApplier.mainSpider.checkFarPlayerChance,
+                (int)UpgradeApplier.mainVentress.checkFarPlayerChance,
+                (int)UpgradeApplier.mainNButcher.checkFarPlayerChance,
+                (int)UpgradeApplier.mainForsaken.checkFarPlayerChance,
+                (int)UpgradeApplier.mainShambler.checkFarPlayerChance,
+                (int)UpgradeApplier.mainAbandoned.checkFarPlayerChance,
+                (int)UpgradeApplier.mainPatient.checkFarPlayerChance,
+                (int)UpgradeApplier.mainCarrier.checkFarPlayerChance,
+                (int)UpgradeApplier.mainButcher.checkFarPlayerChance,
+                (int)UpgradeApplier.mainNShambler.checkFarPlayerChance,
+                (int)UpgradeApplier.mainShepherd.checkFarPlayerChance,
+                (int)UpgradeApplier.mainPackrat.checkFarPlayerChance
+            ];
+            UpgradeApplier.initDetectDelay = [
+
+                UpgradeApplier.mainSpider.checkFarPlayersDelay,
+                UpgradeApplier.mainVentress.checkFarPlayersDelay,
+                UpgradeApplier.mainNButcher.checkFarPlayersDelay,
+                UpgradeApplier.mainForsaken.checkFarPlayersDelay,
+                UpgradeApplier.mainShambler.checkFarPlayersDelay,
+                UpgradeApplier.mainAbandoned.checkFarPlayersDelay,
+                UpgradeApplier.mainPatient.checkFarPlayersDelay,
+                UpgradeApplier.mainCarrier.checkFarPlayersDelay,
+                UpgradeApplier.mainButcher.checkFarPlayersDelay,
+                UpgradeApplier.mainNShambler.checkFarPlayersDelay,
+                UpgradeApplier.mainShepherd.checkFarPlayersDelay,
+                UpgradeApplier.mainPackrat.checkFarPlayersDelay
+            ];
+        }
+
 
         //upgradestter
         public static List<Upgrade> initUpgrades(List<Upgrade> upgrades)
@@ -84,7 +128,7 @@ namespace PlayerUpgrades
             if (upgrades == null) upgrades = new List<Upgrade>();
             else upgrades.Clear();
 
-            AddUpgrade(upgrades, "Evader", "Run from the inevitable.", loadTextures("evader"),
+            AddUpgrade(upgrades, "Evader", "Run from the inevitable.", loadTextures("evader1-crt"),
                 //upgrade start, upgrade max. color
                 0, 5, new Color(1f, 1f, 1f, 1f),
 
@@ -96,7 +140,7 @@ namespace PlayerUpgrades
                 8f)
                 ;
 
-            AddUpgrade(upgrades, "Lurker", "Become undetectable.", loadTextures("lurker"),
+            AddUpgrade(upgrades, "Lurker", "Become undetectable.", loadTextures("lurker1-crt"),
                 //upgrade start, upgrade max. color
                 0, 5, new Color(1f, 1f, 1f, 1f),
 
@@ -108,7 +152,7 @@ namespace PlayerUpgrades
                 0.1f)
                 ;
 
-            AddUpgrade(upgrades, "Hacker", "Fully utilize your limited resources.", loadTextures("hacker"),
+            AddUpgrade(upgrades, "Supplier", "Fully utilize your limited resources.", loadTextures("supplier1-crt"),
                 //upgrade start, upgrade max. color
                 0, 5, new Color(1f, 1f, 1f, 1f),
 
@@ -120,7 +164,7 @@ namespace PlayerUpgrades
                 33f)
                 ;
 
-            AddUpgrade(upgrades, "Ransacker", "Scavenge greater loot.", loadTextures("ransacker"),
+            AddUpgrade(upgrades, "Ransacker", "Scavenge greater loot.", loadTextures("ransacker1-crt"),
                 //upgrade start, upgrade max. color
                 0, 5, new Color(1f, 1f, 1f, 1f),
 
@@ -133,7 +177,7 @@ namespace PlayerUpgrades
                 20f) //test
                 ;
 
-            AddUpgrade(upgrades, "Forerunner", "Get ahead of your opposition.", loadTextures("forerunner"),
+            AddUpgrade(upgrades, "Forerunner", "Get ahead of your opposition.", loadTextures("forerunner1-crt"),
                 //upgrade start, upgrade max. color
                 0, 5, new Color(1f, 1f, 1f, 1f),
 
@@ -209,21 +253,47 @@ namespace PlayerUpgrades
 
         }
 
-        public static Texture2D loadTextures(string name)
+
+    public static Texture2D loadTextures(string name)
         {
-            //get path to images
-            string path = System.IO.Path.Combine(Application.dataPath, "../UserLibs/Upgrades", name + ".png");
-            if (!System.IO.File.Exists(path))
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            string resourceName = assembly.GetManifestResourceNames()
+                .FirstOrDefault(x => x.EndsWith($"{name}.png", System.StringComparison.OrdinalIgnoreCase));
+
+            if (resourceName == null)
             {
-                MelonLogger.Warning($"Image not found at {path}");
+                MelonLogger.Warning($"Embedded image not found: {name}.png");
                 return null;
             }
 
-            byte[] data = System.IO.File.ReadAllBytes(path);
-            Texture2D tex = new Texture2D(2, 2);
-            ImageConversion.LoadImage(tex, data);
-            tex.filterMode = FilterMode.Point; // Makes pixels sharp instead of blurry
-            return tex;
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    MelonLogger.Warning($"Could not open embedded image: {resourceName}");
+                    return null;
+                }
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+
+                    byte[] data = memoryStream.ToArray();
+
+                    Texture2D tex = new Texture2D(2, 2);
+
+                    if (!ImageConversion.LoadImage(tex, data))
+                    {
+                        MelonLogger.Warning($"Failed to load embedded image: {resourceName}");
+                        return null;
+                    }
+
+                    tex.filterMode = FilterMode.Point;
+
+                    return tex;
+                }
+            }
         }
     }
 }
