@@ -55,6 +55,14 @@ namespace PlayerUpgrades
         public static FFLantern mainLantern;
         public static FFFlashlight mainFlashlight;
 
+        public static FFEquipment mainMedkit = null;
+        public static FFAdrenalineShot mainAdrenaline;
+        public static FFWalkieTalkie mainWalkie;
+        public static FFFirecrackers mainFirecrackers;
+        public static FFGasmask mainGasMask;
+        public static FFNoiseMaker mainSoda;
+        public static FFDynamite mainDynamite;
+
         public static int[] originalItemDurabilityValues = { 32, 8, 15, 5 };
         public static double[] originalItemLightValues = { 6, 15, 28 };
 
@@ -88,7 +96,7 @@ namespace PlayerUpgrades
         //public static int[] originalLootItemValuesList;
 
         //store
-        public static int originalCredits;
+        public static int originalCredits = -1;
 
         //debug
         public static bool localDebug = true;
@@ -280,11 +288,11 @@ namespace PlayerUpgrades
                     activeEnemies[i].checkFarPlayersDelay = (int)Math.Ceiling(initDetectDelay[i] * statDistReduce);
                 }
 
-                foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Detect Radius: [{enemy.checkFarPlayerRadius}]");
+                //foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Detect Radius: [{enemy.checkFarPlayerRadius}]");
                 MelonLogger.Msg("\n");
-                foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Search Chance: [{(int)enemy.checkFarPlayerChance}]");
+                //foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Search Chance: [{(int)enemy.checkFarPlayerChance}]");
                 MelonLogger.Msg("\n");
-                foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Detect Delay: [{enemy.checkFarPlayersDelay}]");
+                //foreach (var enemy in activeEnemies) MelonLogger.Msg($"[LURKER] NEW Detect Delay: [{enemy.checkFarPlayersDelay}]");
         }
 
 private static void applyUpgradeHacker(float lvl, float scaler, FFPlayer player)
@@ -356,82 +364,126 @@ private static void applyUpgradeHacker(float lvl, float scaler, FFPlayer player)
 
 }
 
-public static void SyncUpgradesAcrossServer()
-{
-    //credit save
-    originalCredits = train.Credits;
-
-    // #1 Server Upg Sync
-    //
-
-
-    //index dictionary
-    // 9 = server upg sync (!)
-    // 8 = server credit sync
-    // 0-4 = specific server upgrade
-    int index = 9; //server upg sync index
-
-    // parse train name
-    string rawData = train.gameObject.name.Substring(4); // strip "UPG:"
-    string[] levelStrings = rawData.Split(',');
-
-    int compressedUpgInt = 10;
-
-    // update upgrades based on train name
-    for (int i = upgrades.Count-1; i >= 0; i--)
+    public static void SyncUpgradesAcrossServer()
     {
-        if (i < levelStrings.Length && int.TryParse(levelStrings[i], out int parsedLvl))
+        //credit save
+        originalCredits = train.Credits;
+
+        // #1 Server Upg Sync
+        //
+
+
+        //index dictionary
+        // 9 = server upg sync (!)
+        // 8 = server credit sync
+        // 0-4 = specific server upgrade
+        int index = 9; //server upg sync index
+
+        // parse train name
+        string rawData = train.gameObject.name.Substring(4); // strip "UPG:"
+        string[] levelStrings = rawData.Split(',');
+
+        int compressedUpgInt = 10;
+
+        // update upgrades based on train name
+        for (int i = upgrades.Count-1; i >= 0; i--)
         {
-            compressedUpgInt += parsedLvl;
-            compressedUpgInt *= 10;
+            if (i < levelStrings.Length && int.TryParse(levelStrings[i], out int parsedLvl))
+            {
+                compressedUpgInt += parsedLvl;
+                compressedUpgInt *= 10;
+            }
         }
+
+        //complete encoded message for door trigger
+        int encoded = compressedUpgInt + index;
+        encoded -= train.Credits; //credits addition bug workaround
+
+        if (localDebug)
+        {
+            MelonLogger.Msg($"[ENCODE]");
+            MelonLogger.Msg($"Credits: {train.Credits}");
+            MelonLogger.Msg($"Index: {index}");
+            MelonLogger.Msg($"Encoded: {encoded}");
+        }
+        train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
+
+        triggerCreditUpdateSoon = true;
+
     }
 
-    //complete encoded message for door trigger
-    int encoded = compressedUpgInt + index;
-    encoded -= train.Credits; //credits addition bug workaround
-
-    if (localDebug)
+    public static void SyncUpgradesAcrossServer2()
     {
-        MelonLogger.Msg($"[ENCODE]");
-        MelonLogger.Msg($"Credits: {train.Credits}");
-        MelonLogger.Msg($"Index: {index}");
-        MelonLogger.Msg($"Encoded: {encoded}");
-    }
-    train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded);
-    train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
-    train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
 
-    triggerCreditUpdateSoon = true;
+        // #2 Server Seed Sync
 
-}
+        //index dictionary
+        // 9 = server upg sync
+        // 8 = server credit sync (!)
+        // 0-4 = specific server upgrade
+        int index = 7; //seed index
+        int encoded2 = ((gameSeed * 10) + index) - train.Credits; //idek why 3500 is being added. ugp cost?
+                                                       // that is ONLY the evader init cost
 
-public static void SyncUpgradesAcrossServer2()
-{
+        if (localDebug)
+        {
+            MelonLogger.Msg($"[ENCODE]");
+            MelonLogger.Msg($"Seed: {gameSeed}");
+            MelonLogger.Msg($"Index: {index}");
+            MelonLogger.Msg($"Encoded: {encoded2}");
+        }
+        train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded2);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
+        }
+        public static void SyncUpgradesAcrossServer3()
+        {
 
-    // #2 Server Credit Sync
-    // Credits are messed up across the server now from step 1
-    // Sync them back using previously noted original credits and new index
+            // #3 Server Credit Sync
+            // Credits are messed up across the server now from step 1
+            // Sync them back using previously noted original credits and new index
 
-    //index dictionary
-    // 9 = server upg sync
-    // 8 = server credit sync (!)
-    // 0-4 = specific server upgrade
-    int index = 8; //skip index
-    int encoded2 = (originalCredits * 10) + index - 1; //idek why 3500 is being added. ugp cost?
-                                                   // that is ONLY the evader init cost
+            //index dictionary
+            // 9 = server upg sync
+            // 8 = server credit sync (!)
+            // 0-4 = specific server upgrade
+            int index = 8; //skip index
+            int encoded2;
+            if (!secondTrigger) encoded2 = (originalCredits * 10) + index - 1; //idek why 3500 is being added. ugp cost?
+            else encoded2 = (originalCredits * 10) + index - gameSeed; //idek why 3500 is being added. ugp cost?
+                                                                      // that is ONLY the evader init cost
 
-    if (localDebug)
+            if (localDebug)
+            {
+                MelonLogger.Msg($"[ENCODE]");
+                MelonLogger.Msg($"Credits: {train.Credits}");
+                MelonLogger.Msg($"Index: {index}");
+                MelonLogger.Msg($"Encoded: {encoded2}");
+            }
+            train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded2);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+            train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
+        }
+
+        public static void BrokenMinuteServer()
     {
-        MelonLogger.Msg($"[ENCODE]");
-        MelonLogger.Msg($"Credits: {train.Credits}");
-        MelonLogger.Msg($"Index: {index}");
-        MelonLogger.Msg($"Encoded: {encoded2}");
+        int index = 7; //broken minute index
+        int encodedBroken = (originalCredits * 10) + index - 1; //idek why 3500 is being added. ugp cost?
+                                                            // that is ONLY the evader init cost
+
+        if (localDebug)
+        {
+            MelonLogger.Msg($"[ENCODE]");
+            MelonLogger.Msg($"Credits: {train.Credits}");
+            MelonLogger.Msg($"Index: {index}");
+            MelonLogger.Msg($"Encoded: {encodedBroken}");
+        }
+        train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encodedBroken);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
+        train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
     }
-    train.RpcWriter___Server_svr_RequestAddCredits_3316948804(encoded2);
-    train.RpcWriter___Server_svr_ToggleDoors_1140765316(true);
-    train.RpcWriter___Server_svr_ToggleDoors_1140765316(false); //simultaneously open and close doors for trigger
-}
 }
 }
 

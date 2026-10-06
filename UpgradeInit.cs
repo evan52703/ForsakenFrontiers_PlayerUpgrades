@@ -29,18 +29,65 @@ namespace PlayerUpgrades
 {
     internal static class UpgradeInit
     {
+        public static string[] evaderDescriptions = {
+            "All movement speed increased by 10%",
+            "Sprinting stamina decreases 10% slower",
+            "All movement speed increased by 12%\n(22% total)",
+            "Sprinting stamina decreases 12% slower\n(22% total)",
+            "Crawl speed increased by 300%\n\nAll movement speed increased by 8%\n(30% total)\n\nSprinting stamina decreases 8% slower\n(30% total)"
+        };
+        public static string[] lurkerDescriptions = {
+            "+30% crouched movement speed",
+            "Monster's player detection range, chance, and frequency reduced by 15%",
+            "+45% crouched movement speed\n(75% total)",
+            "Monster's player detection range, chance, and frequency reduced by 20%\n(35% total)",
+            "Landmine and tripwire immunity\n\n+25% crouched movement speed\n(100% total)\n\nMonster's player detection range, chance, and frequency reduced by 5%\n(40% total)"
+        };
+        public static string[] supplierDescriptions = {
+            "+30% tool equipment durability",
+            "+25% light equipment range and brightness",
+            "+45% tool equipment durability\n(75% total)",
+            "+35% light equipment range and brightness\n(60% total)",
+            "+50% chance for shop items purchased to be duplicated\n\n+75% tool equipment durability\n(150% total)\n\n+40% light equipment range and brightness\n(100% total)"
+        };
+        public static string[] ransackerDescriptions = {
+            "Non-container loot items are 10% more valuable",
+            "Loot containers contain up to 2 additional loot items\n(+0-2 possible)",
+            "Non-container loot items are 15% more valuable\n(25% total)",
+            "Loot containers contain up to 4 additional loot items\n(+0-4 possible)",
+            "Non-container loot items have a 1% chance to have 500% value\n\nLoot containers contain at least 1 additional loot item\n(+1-4 possible)"
+        };
+        public static string[] forerunnerDescriptions = {
+            "Arrive to each destination 1 hour earlier\n(6:00am -> 5:00am)",
+            "+5% chance for a minute to not pass when it normally world\n(Cannot occur consecutively)",
+            "Arrive to each destination 1 hour earlier\n(5:00am -> 4:00am)",
+            "+7% chance for a minute to not pass when it normally world\n(12% total)\n(Cannot occur consecutively)",
+            "Minutes not passing can occur consecutively\n\nArrive to each destination 1 hour earlier\n(4:00am -> 3:00am)"
+        };
 
         //get all clonable item objects
         public static void GetMainMenuItems()
         {
+            //uses
             UpgradeApplier.mainMarker = FindObjectByName<FFSprayTool>("SprayMark");
             UpgradeApplier.mainBoltcutter = FindObjectByName<FFBoltcutters>("Buoltcutters");
             UpgradeApplier.mainSledgehammer = FindObjectByName<FFSledgehammer>("SledgeHammer");
             UpgradeApplier.mainStunlight = FindObjectByName<FFStunLight>("StunLight");
 
+            //lights
             UpgradeApplier.mainGlowstick = FindObjectByName<FFGlowstick>("Glowstick");
             UpgradeApplier.mainLantern = FindObjectByName<FFLantern>("Lantern");
             UpgradeApplier.mainFlashlight = FindObjectByName<FFFlashlight>("Flashlight");
+
+            //other
+            //UpgradeApplier.mainMedkit = FindObjectByName<FFEquipment>("FirstAidKit");
+            UpgradeApplier.mainAdrenaline = FindObjectByName<FFAdrenalineShot>("Adrenaline Shot");
+            UpgradeApplier.mainWalkie = FindObjectByName<FFWalkieTalkie>("Walkie Talkie");
+            UpgradeApplier.mainFirecrackers = FindObjectByName<FFFirecrackers>("Firecrackers");
+            UpgradeApplier.mainGasMask = FindObjectByName<FFGasmask>("Gasmask");
+            UpgradeApplier.mainSoda = FindObjectByName<FFNoiseMaker>("Noisemaker (soda can)");
+            UpgradeApplier.mainDynamite = FindObjectByName<FFDynamite>("Dynamite");
+
         }
         //GetMainMenuItems/GetMainMenuLootItems helper
         public static T FindObjectByName<T>(string name) where T : UnityEngine.Object
@@ -54,6 +101,21 @@ namespace PlayerUpgrades
                 }
             }
             return null;
+        }
+        public static void InitializeCodex()
+        {
+            // Call your existing loadTextures method
+            _menuTexture = UpgradeInit.loadTextures("codex_long");
+
+            if (_menuTexture != null)
+            {
+                // Create the Sprite once from the loaded texture
+                _menuSprite = Sprite.Create(
+                    _menuTexture,
+                    new Rect(0, 0, _menuTexture.width, _menuTexture.height),
+                    new Vector2(0.5f, 0.5f)
+                );
+            }
         }
 
         //get all clonable enemy objects

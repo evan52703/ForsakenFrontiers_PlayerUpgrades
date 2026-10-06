@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Il2CppFishNet.Broadcast;
+using Il2CppFishNet.Object.Synchronizing;
 using Il2Cppmadeinfairyland.fairyengine;
 using Il2Cppmadeinfairyland.fairyengine.actor.player;
 using Il2Cppmadeinfairyland.forsakenfrontiers;
@@ -18,8 +19,10 @@ using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine.UIElements;
 using static Il2CppSystem.Array;
+using static PlayerUpgrades.UpgradeMenu;
 using ImageConversion = UnityEngine.ImageConversion;
 
 [assembly: MelonInfo(typeof(PlayerUpgrades.Core), "PlayerUpgrades", "0.5.0", "evan527", null)]
@@ -65,6 +68,8 @@ namespace PlayerUpgrades
         private KeyCode menuKey = KeyCode.F2;
         private KeyCode testingKey = KeyCode.T;
 
+        public static bool _slide = false;
+
         //steam
         public static ulong localSteamID
         {
@@ -99,11 +104,20 @@ namespace PlayerUpgrades
 
         public static bool containersSet = false;
 
+        //Forerunner
         public static int brokenMinChance = 0;
         public static bool brokenMinConsecutive = false;
         public static bool consecutiveTick = false;
         public static int minute = 0;
         public static int hour = 6;
+        public static float brokenMinuteTimer = 0f;
+        public static bool runForerunnerBrokenMinuteTimer = false; 
+        public static bool triedBrokenMinute = false;
+        public static int gameSeed = UnityEngine.Random.Range(1, 500);
+        public static int syncTimer = 0;
+        public static bool syncReady = false;
+        public static int threeHundredTimer = 0;
+        public static bool sendin300ticks = false; 
 
         //saves
         public static FairyCoreManager coreManager;
@@ -112,7 +126,8 @@ namespace PlayerUpgrades
         public static bool currentSaveFound;
         public static bool saveLoaded = false;
         public static int settleSettleTimer = 0;
-        public static bool playerInitSettledSettled = false;
+        public static bool playerInitSettledSettled = false; 
+        public static bool secondTrigger = false;
         public static FFSaveFileButton currentSave = null;
 
         //player
@@ -120,17 +135,35 @@ namespace PlayerUpgrades
         public static int truePlayerCount = 0; //host only
         public static float playerCheckTimer;
 
+        //menu
+        public static Texture2D _menuTexture;
+        public static Sprite _menuSprite;
+        public static int menuX;
+        public static int menuY;
+
+        public static bool inDataDeck = false;
+
+        public static System.Random seededRandom;
+        public static int seed;
+
+        //fonts
+        public static AssetBundle CustomBundle;
+        public static Font CustomFont;
+
         //################################################################################################################
         //Methods
 
+        
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             //MENU LOAD
             if (sceneName == "Main Menu")
             {
-               //main menu items init
+                //main menu items init
                 UpgradeInit.GetMainMenuItems();
+                UpgradeInit.InitializeCodex();
                 UpgradeInit.GetMainMenuEnemies();
+                UpgradeMenu.MenuAdjustmentsInit();
                 //waitingForSceneObjects = true;
 
                 //Find Save Buttons
@@ -144,7 +177,14 @@ namespace PlayerUpgrades
                 {
                     MelonLogger.Msg($"{save.saveFile}");
                 }
+                // Use the full manifest path: "YourDefaultNamespace.FileName"
+                CustomBundle = EmbeddedBundleLoader.LoadEmbeddedBundle("PlayerUpgrades.customfontbundle");
 
+                if (CustomBundle != null)
+                {
+                    // Load your font or TMP asset out of the bundle
+                    CustomFont = CustomBundle.LoadAsset<Font>("mago1");
+                }
 
             }
 
@@ -165,6 +205,7 @@ namespace PlayerUpgrades
                 amIHost = SteamIDUses.IsHost(localSteamID);
                 waitingForSceneObjects = true;
                 inGame = false;
+                UpgradeInit.InitializeCodex();
                 MelonLogger.Msg($"Save File to Load: {currentHover}");
                 MelonLogger.Msg($"Save File Found? {currentSaveFound}");
 
@@ -194,6 +235,8 @@ namespace PlayerUpgrades
 
                 settleTimer = 0;
                 playerInitSettled = false;
+                syncTimer = 0;
+                syncReady = false;
 
                 triggerTimer = 0;
                 triggerCreditUpdateSoon = false;
@@ -206,6 +249,12 @@ namespace PlayerUpgrades
                 consecutiveTick = false;
 
 
+                threeHundredTimer = 0;
+                sendin300ticks = false;
+
+                inDataDeck = false;
+                _slide = false;
+                animationOffset = -300;
             }
 
         }
@@ -218,30 +267,80 @@ namespace PlayerUpgrades
             if (!inGame || train == null) return;
 
             //do not run until set
-            forerunnerVarReset();
-            if (playerInitSettled && SteamIDUses.IsHost(localSteamID) && upgrades[4].upgLvl >= 2 && train.IsStoppedAtPOI) forerunnerBrokenMinuteTimer();
+            upgradeConditionalVarReset();
+            if (playerInitSettled && train.IsStoppedAtPOI && !triedBrokenMinute)
+            {
+                MelonLogger.Msg("[TRYING BROKEN MINUTE]");
+                triedBrokenMinute = true;
+
+                if (upgrades[4].upgLvl >= 2)
+                {
+                    MelonLogger.Msg("[BROKEN MINUTE TIMER PASSED]");
+                    runForerunnerBrokenMinuteTimer = true;
+                }
+                else
+                {
+                    MelonLogger.Msg("[BROKEN MINUTE TIMER FAILED]");
+                }
+            }
+            if (runForerunnerBrokenMinuteTimer) forerunnerBrokenMinuteTimer();
             playerAmountChange();
             runTimers();
             saveLoader();
 
+            //if looking at datadeck deck
+            if (Input.GetKeyDown(KeyCode.Escape)) inDataDeck = !inDataDeck;
+
             //enable/disable menu
-            if (Input.GetKeyDown(menuKey) && inGame)
+            if (Input.GetKeyDown(menuKey) && inGame && inDataDeck)
             {
-                _menuEnabled = !_menuEnabled;
+                _slide = !_slide;
+                _menuEnabled = true;
             }
 
+            //disable menu if leaving datadeck
+            if (!inDataDeck) _slide = false;
+
             //texture randomizer
-            if (upgradeSelected != null)
+            if (upgradeSelected != null && !train.IsStoppedAtPOI)
             {
                 int randomInt = UnityEngine.Random.Range(1, 201);
 
                 string textureName;
                 if (randomInt >= 198) textureName = "blank";
-                else if (randomInt >= 60 )textureName = upgradeSelected.upgName + (upgradeSelected.upgLvl + 1).ToString() + "-crt";
+                else if (randomInt >= 60) textureName = upgradeSelected.upgName + (upgradeSelected.upgLvl + 1).ToString() + "-crt";
                 else textureName = upgradeSelected.upgName + (upgradeSelected.upgLvl + 1).ToString() + "-crt-vhs-camcorder-effect";
 
                 upgradeSelected.upgImg = UpgradeInit.loadTextures(textureName);
             }
+
+            //seed test
+            if (Input.GetKeyDown(KeyCode.M) && inGame)
+            {
+                MelonLogger.Msg($"seed = {gameSeed}");
+            }
+            //seed test
+            if (Input.GetKeyDown(KeyCode.J) && inGame)
+            {
+               train.Credits = 20000;
+            }
+
+            //300 tick
+            if (sendin300ticks)
+            {
+                threeHundredTimer++;
+
+                if (threeHundredTimer >= 300)
+                {
+                    threeHundredTimer = 0;
+                    sendin300ticks = false;
+                    UpgradeApplier.SyncUpgradesAcrossServer();
+                }
+            }
+        }
+        public static void updateSeed()
+        {
+            seededRandom = new System.Random(gameSeed);
         }
 
         public override void OnGUI()
@@ -265,6 +364,11 @@ namespace PlayerUpgrades
             else
             {
                 // Hand off the work to our separate class
+                if (_menuTexture != null & !train.IsStoppedAtPOI)
+                {
+                    // Draw using the cached Texture2D
+                    GUI.DrawTexture(new Rect(10 + menuX + UpgradeMenu.animationOffset, 10 + menuY, 288, 477), _menuTexture);
+                }
                 UpgradeMenu.Draw(upgrades, ref upgradeSelected);
             }
         }
@@ -280,6 +384,7 @@ namespace PlayerUpgrades
                     {
                         currentHover = save.saveFile;
                         currentSave = save;
+                        if (UpgradeApplier.mainMedkit == null) UpgradeApplier.mainMedkit = UpgradeInit.FindObjectByName<FFEquipment>("FirstAidKit");
                         MelonLogger.Msg($"Save file: '{currentHover}' hovered.");
                     }
                     //special case for deleting previous save and never touching other buttons
@@ -326,36 +431,43 @@ namespace PlayerUpgrades
                 return;
             }
         }
-        public static void forerunnerVarReset()
+        public static void upgradeConditionalVarReset()
         {
             //forerunner var reset
             if (!train.IsStoppedAtPOI && worldGenUpgradesSet)
             {
                 MelonLogger.Msg($"\n[RANSACKER] worldGenUpgradesSet PROPERLY RESET.\n");
                 worldGenUpgradesSet = false;
-                MelonLogger.Msg($"\n[GENERAL] atPOI var reset too.\n");
                 arrivingToPOI = false;
+            }
+            //forerunner var reset
+            if (!train.IsStoppedAtPOI && runForerunnerBrokenMinuteTimer)
+            {
+                MelonLogger.Msg($"\n[FORERUNNER] runForerunnerBrokenMinuteTimer PROPERLY RESET.\n");
+                runForerunnerBrokenMinuteTimer = false;
             }
         }
         public static void forerunnerBrokenMinuteTimer()
         {
-            //when time changes
-            if (minute != world.Minute)
-            {
-                //if lvl 5 or hasn't already triggered this minute
-                if (!consecutiveTick || brokenMinConsecutive)
+            brokenMinuteTimer += Time.deltaTime;
+
+            if (brokenMinuteTimer < 0.5f) return;
+
+            brokenMinuteTimer = 0f;
+
+            if (minute == world.Minute) return;
+
+            //if lvl 5 or hasn't already triggered this minute
+            if (!consecutiveTick || brokenMinConsecutive)
                 {
                     //roll to roll back a minute
-                    int randomInt = UnityEngine.Random.Range(1, 101);
+                    int randomInt = seededRandom.Next(1, 101);
                     if (randomInt <= brokenMinChance)
                     {
-                        //rollback and tick consecutive tick for no consecutive broken min
-                        MelonLogger.Msg($"[FORERUNNER] BROKEN MINUTE");
-
+                        MelonLogger.Msg($"\n[FORERUNNER] BROKEN MINUTE\n");
                         //these 2 need to be called into harmony
                         world.Minute = minute; //IN HARMONY
                         world.Hour = hour;     //IN HARMONY
-
                         consecutiveTick = true;
                     }
                     //if roll fails, update minute and continue
@@ -370,7 +482,6 @@ namespace PlayerUpgrades
                 {
                     consecutiveTick = false;
                 }
-            }
         }
         public static void playerAmountChange()
         {
@@ -401,10 +512,16 @@ namespace PlayerUpgrades
                         truePlayerCount = playerCountCheck;
 
                         //Door Trigger Code 9: Sync current server upgrade levels across all players
-                        UpgradeApplier.SyncUpgradesAcrossServer();
+                        triggerTimer = 0;
+                        if (currentSaveFound) sendin300ticks = true;
+                        else
+                        {
+                            triggerTimer = 0;
+                            UpgradeApplier.SyncUpgradesAcrossServer();
+                        }
 
-                        //Update local upgrade cost values based on truePlayerCount
-                        UpgradeInit.UpdateCostsAccToPlayerCount(truePlayerCount);
+                            //Update local upgrade cost values based on truePlayerCount
+                            UpgradeInit.UpdateCostsAccToPlayerCount(truePlayerCount);
                         return;
                     }
                     //Non-Host trigger
@@ -431,18 +548,35 @@ namespace PlayerUpgrades
             else playerInitSettled = true;
 
             //player init settle 2
-            if (settleSettleTimer < 60) settleSettleTimer++;
+            if (settleSettleTimer < 65) settleSettleTimer++;
             else playerInitSettledSettled = true;
 
+
             //ladder credit trigger
-            if (triggerCreditUpdateSoon)
+            if (triggerCreditUpdateSoon && playerInitSettled)
             {
                 triggerTimer++;
-                if (triggerTimer >= 30)
+                if (triggerTimer == 20)
                 {
-                    MelonLogger.Msg($"\n TRIGGER TIMER 30\n");
+                    MelonLogger.Msg($"\n TRIGGER TIMER 20\n");
+                    UpgradeApplier.SyncUpgradesAcrossServer3();
+                }
+                if (triggerTimer == 40)
+                {
+                    MelonLogger.Msg($"\n TRIGGER TIMER 40\n");
                     UpgradeApplier.SyncUpgradesAcrossServer2();
+                }
+                if (triggerTimer == 60)
+                {
+                    MelonLogger.Msg($"\n TRIGGER TIMER 60\n");
+                    secondTrigger = true;
+                    UpgradeApplier.SyncUpgradesAcrossServer3();
                     triggerCreditUpdateSoon = false;
+                }
+                if (triggerTimer >= 62)
+                {
+                    MelonLogger.Msg($"\n TRIGGER TIMER 62\n");
+                    secondTrigger = false;
                     triggerTimer = 0;
                 }
             }
@@ -486,6 +620,7 @@ namespace PlayerUpgrades
 
                     MelonLogger.Msg($"[!] UPGRADES FOUND: {numbers[0]},{numbers[1]},{numbers[2]},{numbers[3]},{numbers[4]}");
                     MelonLogger.Msg($"[!] TRAIN NAME: {train.gameObject.name}");
+                    triggerTimer = 0;
                     UpgradeApplier.SyncUpgradesAcrossServer();
                 }
                 else
@@ -496,7 +631,7 @@ namespace PlayerUpgrades
             }
 
             //save doesnt exist and file has upgs in it
-            else if (playerInitSettledSettled && !currentSaveFound && !saveLoaded)
+            else if (playerInitSettledSettled && !currentSaveFound && !saveLoaded && triggerTimer == 0)
             {
                 saveLoaded = true;
                 MelonLogger.Msg("Entered SaveLoader WITHOUT SAVE...");
@@ -530,6 +665,8 @@ namespace PlayerUpgrades
                 upg.costScaler *= (int)costScaleMult;
             }
         }
+
+
     }
 
 }

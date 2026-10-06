@@ -15,6 +15,7 @@
 	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="blank.png" />
+	  <None Remove="customfontbundle" />
 	  <None Remove="DungeonFont.ttf" />
 	  <None Remove="evader1-crt-vhs-camcorder-effect.png" />
 	  <None Remove="evader1-crt.png" />
@@ -28,6 +29,8 @@
 	  <None Remove="evader5-crt.png" />
 	  <None Remove="evader6-crt-vhs-camcorder-effect.png" />
 	  <None Remove="evader6-crt.png" />
+	  <None Remove="images\codex.png" />
+	  <None Remove="images\codex_long.png" />
 	  <None Remove="images\evader1-crt-vhs-camcorder-effect.png" />
 	  <None Remove="images\evader1-crt.png" />
 	  <None Remove="images\evader2-crt-vhs-camcorder-effect.png" />
@@ -504,8 +507,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <EmbeddedResource Include="customfontbundle" />
 	  <EmbeddedResource Include="images\blank.png" />
 	  <EmbeddedResource Include="DungeonFont.ttf" />
+	  <EmbeddedResource Include="images\codex.png" />
+	  <EmbeddedResource Include="images\codex_long.png" />
 	  <EmbeddedResource Include="images\evader1-crt-vhs-camcorder-effect.png" />
 	  <EmbeddedResource Include="images\evader1-crt.png" />
 	  <EmbeddedResource Include="images\evader2-crt-vhs-camcorder-effect.png" />
